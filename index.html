@@ -44,7 +44,6 @@ h1{margin:0;font-size:1.35rem;letter-spacing:-.02em;line-height:1.2}
 select,input[type=number],input[type=text]{width:100%;padding:9px 10px;background:var(--soft);border:1px solid var(--line);border-radius:6px;font:13px var(--mono);transition:border-color .15s;-webkit-appearance:none;appearance:none}
 select{background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'><path fill='%23a09ca8' d='M0 0l5 6 5-6z'/></svg>");background-repeat:no-repeat;background-position:right 10px center;padding-right:28px}
 select:focus,input[type=number]:focus,input[type=text]:focus{outline:none;border-color:var(--accent)}
-input[type=color]{width:100%;height:40px;background:var(--soft);border:1px solid var(--line);border-radius:6px;padding:3px;cursor:pointer;-webkit-appearance:none;appearance:none}
 input[type=range]{width:100%;accent-color:var(--accent);height:32px;cursor:pointer;-webkit-appearance:none;appearance:none;background:transparent}
 input[type=range]::-webkit-slider-runnable-track{height:6px;background:var(--soft);border-radius:3px;border:1px solid var(--line)}
 input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:20px;height:20px;border-radius:50%;background:var(--accent);margin-top:-8px;box-shadow:0 1px 3px #0008;border:2px solid var(--bg)}
@@ -78,7 +77,6 @@ input[type=range]::-moz-range-thumb{width:18px;height:18px;border-radius:50%;bac
 .btn.alt:hover:not(:disabled){border-color:var(--accent);color:var(--accent)}
 .btn.sm{flex:0 0 auto;min-width:0;padding:8px 14px;font-size:12.5px}
 
-/* Virtualized thumbnail strip */
 .thumbs-viewport{position:relative;overflow-x:auto;overflow-y:hidden;height:70px;margin-top:12px;padding-bottom:4px;-webkit-overflow-scrolling:touch;scrollbar-width:thin;contain:strict}
 .thumbs-viewport::-webkit-scrollbar{height:6px}
 .thumbs-viewport::-webkit-scrollbar-thumb{background:var(--line);border-radius:3px}
@@ -90,16 +88,19 @@ input[type=range]::-moz-range-thumb{width:18px;height:18px;border-radius:50%;bac
 .thumb .edited-dot{position:absolute;top:3px;right:3px;width:8px;height:8px;border-radius:50%;background:var(--warn);box-shadow:0 0 0 1.5px #000a}
 .thumb-status{color:var(--muted);font:12px var(--mono);margin-top:8px}
 
-.stage{position:relative;border:1px solid var(--line);border-radius:8px;padding:14px;background:#0a0a0e;display:flex;align-items:center;justify-content:center;min-height:180px;overflow:hidden;background-image:linear-gradient(45deg,#1c1d24 25%,transparent 25%),linear-gradient(-45deg,#1c1d24 25%,transparent 25%),linear-gradient(45deg,transparent 75%,#1c1d24 75%),linear-gradient(-45deg,transparent 75%,#1c1d24 75%);background-size:14px 14px;background-position:0 0,0 7px,7px -7px,-7px 0}
+.stage{position:relative;border:1px solid var(--line);border-radius:8px;padding:14px;background:#0a0a0e;display:flex;align-items:center;justify-content:center;min-height:180px;overflow:hidden}
 .stage canvas{max-width:100%;height:auto;image-rendering:pixelated;image-rendering:crisp-edges;display:block;border-radius:2px;box-shadow:0 0 0 1px #0008}
 .stage-empty{color:var(--muted);font-size:13px;text-align:center;padding:30px 10px;line-height:1.5}
 .stage-empty .big{font-size:28px;display:block;margin-bottom:6px;opacity:.4}
 .badge{position:absolute;top:8px;right:8px;background:#1a1b22e6;border:1px solid var(--line);border-radius:5px;padding:4px 8px;color:var(--muted);font:10.5px var(--mono);pointer-events:none;backdrop-filter:blur(4px)}
 
 .scrub{display:flex;align-items:center;gap:8px;margin-top:12px}
-.scrub .btn.alt{padding:8px 12px;min-width:40px;flex:0 0 auto;font-size:16px;font-weight:400}
-.scrub input[type=range]{flex:1}
-.counter{color:var(--muted);font:11.5px var(--mono);white-space:nowrap;min-width:56px;text-align:right}
+.scrub .btn.alt{padding:6px 10px;min-width:0;flex:0 0 auto;font-size:15px;font-weight:400}
+.scrub .btn.alt.play{font-size:14px}
+.scrub input[type=range]{flex:1;min-width:0}
+.counter-group{display:flex;align-items:center;gap:3px;font:11.5px var(--mono);color:var(--muted);white-space:nowrap;flex-shrink:0}
+.counter-group input{width:48px;padding:4px 6px;font-size:12px;text-align:right;background:var(--soft);border:1px solid var(--line);border-radius:4px;font-family:var(--mono)}
+.counter-group input:focus{outline:none;border-color:var(--accent)}
 
 .palette{display:flex;flex-wrap:wrap;gap:6px;margin-top:12px;min-height:26px}
 .palette-empty{color:var(--muted);font:11.5px var(--mono)}
@@ -145,8 +146,9 @@ input[type=range]::-moz-range-thumb{width:18px;height:18px;border-radius:50%;bac
 
 .progress{position:fixed;top:0;left:0;right:0;height:3px;z-index:60;pointer-events:none;opacity:0;transition:opacity .2s}
 .progress.active{opacity:1}
-.progress .bar{height:100%;width:100%;background:linear-gradient(90deg,transparent,var(--accent),transparent);animation:progressSweep 1.2s ease-in-out infinite}
-@keyframes progressSweep{0%{transform:translateX(-100%)}100%{transform:translateX(100%)}}
+.progress .bar{height:100%;width:0;background:var(--accent);transition:width .15s ease-out}
+.progress .pct{position:fixed;top:8px;left:50%;transform:translateX(-50%);background:var(--panel);border:1px solid var(--line);border-radius:99px;padding:3px 10px;font:11px var(--mono);color:var(--text);opacity:0;transition:opacity .2s;z-index:61}
+.progress.active+.pct,.progress.active~.pct{opacity:1}
 
 footer{border-top:1px solid var(--line);margin-top:32px;padding-top:16px;color:var(--muted);font-size:.78rem;line-height:1.55;display:flex;flex-direction:column;gap:6px}
 footer code{font-family:var(--mono);font-size:11px;background:var(--soft);padding:1px 5px;border-radius:3px;border:1px solid var(--line)}
@@ -163,20 +165,23 @@ footer code{font-family:var(--mono);font-size:11px;background:var(--soft);paddin
   .buttons .btn[data-wide]{grid-column:1/-1}
   .stage{min-height:150px;padding:10px}
   .badge{font-size:9.5px;padding:3px 6px;top:6px;right:6px}
-  .counter{font-size:11px;min-width:50px}
   .fab{bottom:calc(14px + var(--safe-bottom));right:14px;width:48px;height:48px;font-size:20px}
   .group>summary{padding:13px 2px}
   .group-preview{font-size:11px}
+  .scrub{gap:5px}
+  .scrub .btn.alt{padding:6px 8px;font-size:13px}
+  .counter-group input{width:42px;padding:3px 5px}
 }
 </style>
 </head>
 <body>
-<div class="progress" id="progressBar"><div class="bar"></div></div>
+<div class="progress" id="progressBar"><div class="bar" id="progressBarFill"></div></div>
+<div class="pct" id="progressPct">0%</div>
 
 <main class="app">
   <header>
     <h1>Frame → Block Text</h1>
-    <p class="lead">Upload images or a ZIP of frames. Preview the sequence, tap ✎ to edit a frame's markup, then download a ZIP with <code>square/</code> and <code>hash/</code> folders.</p>
+    <p class="lead">Upload images or a ZIP of frames. Preview the sequence, play it back, edit individual frames with ✎, then download a ZIP with <code>square/</code> and <code>hash/</code> folders.</p>
   </header>
 
   <div class="layout">
@@ -241,6 +246,14 @@ footer code{font-family:var(--mono);font-size:11px;background:var(--soft);paddin
               </select>
             </div>
             <div class="field">
+              <label for="dither">Dithering</label>
+              <select id="dither">
+                <option value="none">None — crisp blocks</option>
+                <option value="fs">Floyd–Steinberg — smooth</option>
+                <option value="bayer">Ordered / Bayer — retro</option>
+              </select>
+            </div>
+            <div class="field">
               <label for="colors">Colours <span id="colorsVal">16</span></label>
               <input id="colors" type="range" min="2" max="64" value="16">
             </div>
@@ -256,20 +269,6 @@ footer code{font-family:var(--mono);font-size:11px;background:var(--soft);paddin
             <div class="field"><label for="brightness">Brightness <span id="brightnessVal">1.00</span></label><input id="brightness" type="range" min="0" max="200" value="100"></div>
             <div class="field"><label for="saturation">Saturation <span id="saturationVal">1.60</span></label><input id="saturation" type="range" min="0" max="300" value="160"></div>
             <div class="field"><label for="contrast">Contrast <span id="contrastVal">1.50</span></label><input id="contrast" type="range" min="0" max="300" value="150"></div>
-          </div>
-        </details>
-
-        <details class="group">
-          <summary>
-            <span class="group-title">Background &amp; alpha</span>
-            <span class="group-preview" id="bgPreview">#ffffff · α 60</span>
-          </summary>
-          <div class="group-body">
-            <div class="row">
-              <div class="field"><label for="bg">Background</label><input id="bg" type="color" value="#ffffff"></div>
-              <div class="field"><label for="thresh">BG threshold <span id="threshVal">60</span></label><input id="thresh" type="range" min="0" max="255" value="60"></div>
-            </div>
-            <div class="field"><label for="alpha">Alpha hex</label><input id="alpha" type="text" maxlength="2" value="ff"></div>
           </div>
         </details>
 
@@ -311,9 +310,14 @@ footer code{font-family:var(--mono);font-size:11px;background:var(--soft);paddin
         </div>
         <div class="scrub">
           <button class="btn alt" id="prev" type="button" aria-label="Previous">‹</button>
-          <input id="slider" type="range" min="0" max="0" value="0" disabled aria-label="Frame slider">
+          <button class="btn alt play" id="playBtn" type="button" aria-label="Play">▶</button>
           <button class="btn alt" id="next" type="button" aria-label="Next">›</button>
-          <span class="counter" id="counter">0 / 0</span>
+          <input id="slider" type="range" min="0" max="0" value="0" disabled aria-label="Frame slider">
+          <div class="counter-group">
+            <input id="jumpInput" type="number" min="1" max="1" value="1" aria-label="Jump to frame">
+            <span>/</span>
+            <span id="totalFrames">0</span>
+          </div>
         </div>
         <div class="palette" id="palette"><span class="palette-empty">No palette yet</span></div>
         <div class="stats" id="stats"></div>
@@ -365,29 +369,30 @@ footer code{font-family:var(--mono);font-size:11px;background:var(--soft);paddin
 
   const $ = id => document.getElementById(id);
   const E = {};
-  ['drop','files','clear','thumbsViewport','thumbsInner','source','mode','divider','dividerVal','design','cols','rows',
-   'colors','colorsVal','brightness','brightnessVal','saturation','saturationVal','contrast','contrastVal',
-   'bg','thresh','threshVal','alpha','square','hash','dupes','outFps','srcFps','reset','download',
-   'preview','stage','stageEmpty','badge','prev','next','slider','counter','palette','stats','frameName',
-   'downloadTxt','downloadPng','output','toast','editFab','editor','editorSub','editorHint','editorClose',
-   'editorReset','editorCopy','editorBackdrop','progressBar',
-   'sizePreview','designPreview','adjPreview','bgPreview','exportPreview'
+  ['drop','files','clear','thumbsViewport','thumbsInner','source','mode','divider','dividerVal',
+   'design','dither','cols','rows','colors','colorsVal','brightness','brightnessVal','saturation',
+   'saturationVal','contrast','contrastVal','square','hash','dupes','outFps','srcFps','reset','download',
+   'preview','stage','stageEmpty','badge','prev','playBtn','next','slider','jumpInput','totalFrames',
+   'palette','stats','frameName','downloadTxt','downloadPng','output','toast','editFab','editor',
+   'editorSub','editorHint','editorClose','editorReset','editorCopy','editorBackdrop',
+   'progressBar','progressBarFill','progressPct',
+   'sizePreview','designPreview','adjPreview','exportPreview'
   ].forEach(id => E[id] = $(id));
 
   // ─── State ──────────────────────────────────────────────────
-  let frames = [];       // { id, name, blob, url, edited, _cache }
+  let frames = [];
   let at = -1;
   let lastRender = null;
   let toastTimer;
   let nextId = 0;
   let showSeq = 0;
+  let playing = false;
+  let playTimer = null;
 
-  // Decoded-image LRU cache — only keeps a handful in memory
-  const IMG_CACHE_MAX = 8;
-  const imgCache = new Map();  // frameId -> { img }
-  const decoding = new Map();  // frameId -> Promise<img>
+  const IMG_CACHE_MAX = 10;
+  const imgCache = new Map();
+  const decoding = new Map();
 
-  // Thumbnail virtualization
   const THUMB_W = 58, THUMB_GAP = 7;
   const ITEM_W = THUMB_W + THUMB_GAP;
   const BUFFER = 4;
@@ -395,15 +400,14 @@ footer code{font-family:var(--mono);font-size:11px;background:var(--soft);paddin
   let lastThumbsKey = '';
 
   const DEFAULTS = {
-    mode:'auto', divider:'1', design:'block', cols:'80', rows:'45', colors:'16',
-    brightness:'100', saturation:'160', contrast:'150', bg:'#ffffff', thresh:'60',
-    alpha:'ff', outFps:'8', srcFps:'30'
+    mode:'auto', divider:'1', design:'block', dither:'none', cols:'80', rows:'45',
+    colors:'16', brightness:'100', saturation:'160', contrast:'150',
+    outFps:'8', srcFps:'30'
   };
 
   // ─── Utils ──────────────────────────────────────────────────
   const clamp = v => Math.max(0, Math.min(255, Math.round(v)));
   const hx = v => clamp(v).toString(16).padStart(2, '0');
-  const rgb = h => { h = h.replace('#',''); return [parseInt(h.slice(0,2),16), parseInt(h.slice(2,4),16), parseInt(h.slice(4,6),16)]; };
   const lum = (r,g,b) => 0.299*r + 0.587*g + 0.114*b;
   const natural = (a,b) => a.localeCompare(b, undefined, {numeric:true, sensitivity:'base'});
   const yieldUI = () => new Promise(r => setTimeout(r, 0));
@@ -417,10 +421,21 @@ footer code{font-family:var(--mono);font-size:11px;background:var(--soft);paddin
     E.toast.textContent = msg;
     E.toast.classList.add('show');
     clearTimeout(toastTimer);
-    toastTimer = setTimeout(() => E.toast.classList.remove('show'), 2000);
+    toastTimer = setTimeout(() => E.toast.classList.remove('show'), 2200);
   }
-  function startProgress() { E.progressBar.classList.add('active'); }
-  function stopProgress() { E.progressBar.classList.remove('active'); }
+
+  function setProgress(pct) {
+    if (pct == null) {
+      E.progressBar.classList.remove('active');
+      E.progressPct.classList.remove('active');
+      return;
+    }
+    E.progressBar.classList.add('active');
+    E.progressPct.classList.add('active');
+    const p = Math.max(0, Math.min(100, pct));
+    E.progressBarFill.style.width = p + '%';
+    E.progressPct.textContent = Math.round(p) + '%';
+  }
 
   function triggerDownload(blob, filename) {
     const a = document.createElement('a');
@@ -435,24 +450,22 @@ footer code{font-family:var(--mono);font-size:11px;background:var(--soft);paddin
   // ─── Labels ─────────────────────────────────────────────────
   const MODE_LABEL = { auto:'Auto', l:'Landscape', p:'Portrait', s:'Square' };
   const DESIGN_LABEL = { block:'Block', shade:'Shade', gray:'Gray' };
+  const DITHER_LABEL = { none:'no dither', fs:'FS dither', bayer:'Bayer' };
 
   function labels() {
     E.colorsVal.textContent = E.colors.value;
-    E.threshVal.textContent = E.thresh.value;
     E.brightnessVal.textContent = (+E.brightness.value/100).toFixed(2);
     E.saturationVal.textContent = (+E.saturation.value/100).toFixed(2);
     E.contrastVal.textContent = (+E.contrast.value/100).toFixed(2);
     E.dividerVal.textContent = readDivider();
 
     E.sizePreview.textContent = `${E.cols.value}×${E.rows.value} · ${MODE_LABEL[E.mode.value] || 'Auto'}`;
-    E.designPreview.textContent = `${DESIGN_LABEL[E.design.value] || 'Block'} · ${E.colors.value} colours`;
+    E.designPreview.textContent =
+      `${DESIGN_LABEL[E.design.value] || 'Block'} · ${E.colors.value}c · ${DITHER_LABEL[E.dither.value] || 'none'}`;
     E.adjPreview.textContent =
       `B ${(+E.brightness.value/100).toFixed(2)} · ` +
       `S ${(+E.saturation.value/100).toFixed(2)} · ` +
       `C ${(+E.contrast.value/100).toFixed(2)}`;
-
-    const alphaVal = (E.alpha.value || 'ff').replace(/[^0-9a-f]/ig, '').slice(0,2).padEnd(2,'f') || 'ff';
-    E.bgPreview.textContent = `${E.bg.value} · α ${E.thresh.value} · ${alphaVal}`;
 
     const exp = [];
     if (E.square.checked) exp.push('square');
@@ -462,24 +475,20 @@ footer code{font-family:var(--mono);font-size:11px;background:var(--soft);paddin
   }
 
   function settings(cols = +E.cols.value || 80, rows = +E.rows.value || 45) {
-    const b = rgb(E.bg.value);
     return {
       design: E.design.value,
+      dither: E.dither.value,
       cols: Math.max(4, Math.min(200, cols)),
       rows: Math.max(4, Math.min(200, rows)),
       colors: +E.colors.value,
       brightness: +E.brightness.value / 100,
       saturation: +E.saturation.value / 100,
-      contrast: +E.contrast.value / 100,
-      bgR: b[0], bgG: b[1], bgB: b[2],
-      thresh: +E.thresh.value,
-      alpha: (E.alpha.value || 'ff').replace(/[^0-9a-f]/ig, '').slice(0,2).padEnd(2,'f') || 'ff'
+      contrast: +E.contrast.value / 100
     };
   }
 
   function settingsKey(s) {
-    return [s.design, s.cols, s.rows, s.colors, s.brightness, s.saturation, s.contrast,
-            s.bgR, s.bgG, s.bgB, s.thresh, s.alpha].join('|');
+    return [s.design, s.dither, s.cols, s.rows, s.colors, s.brightness, s.saturation, s.contrast].join('|');
   }
 
   // ─── Profile dims ───────────────────────────────────────────
@@ -487,14 +496,15 @@ footer code{font-family:var(--mono);font-size:11px;background:var(--soft);paddin
     let m = E.mode.value;
     if (m === 'auto') {
       if (!frames.length) return 'l';
-      // Use image natural size once decoded; else fall back
-      const f = frames[0];
-      const c = imgCache.get(f.id);
-      if (c && c.img && c.img.naturalWidth) {
-        const q = c.img.naturalWidth / c.img.naturalHeight;
-        return q > 1.15 ? 'l' : q < 0.87 ? 'p' : 's';
+      const c = imgCache.get(frames[0].id);
+      if (c && c.img) {
+        const w = c.img.naturalWidth || c.img.width;
+        const h = c.img.naturalHeight || c.img.height;
+        if (w && h) {
+          const q = w / h;
+          return q > 1.15 ? 'l' : q < 0.87 ? 'p' : 's';
+        }
       }
-      // Fallback: assume landscape until we know
       return 'l';
     }
     return m;
@@ -516,44 +526,61 @@ footer code{font-family:var(--mono);font-size:11px;background:var(--soft);paddin
     E.rows.value = h;
   }
 
-  // ─── Decode (lazy, cached) ──────────────────────────────────
+  // ─── Decode (createImageBitmap, async, LRU) ────────────────
   function getCachedImage(frame) {
     const c = imgCache.get(frame.id);
-    if (c && c.img && c.img.complete && c.img.naturalWidth > 0) {
-      // LRU refresh
-      imgCache.delete(frame.id);
-      imgCache.set(frame.id, c);
-      return c.img;
+    if (!c || !c.img) return null;
+    imgCache.delete(frame.id);
+    imgCache.set(frame.id, c);
+    return c.img;
+  }
+
+  async function decodeFrameBlob(blob, url) {
+    if (typeof createImageBitmap === 'function') {
+      try {
+        return await createImageBitmap(blob, { imageOrientation: 'from-image' });
+      } catch (e) { /* fall through */ }
     }
-    return null;
+    return new Promise((resolve, reject) => {
+      const img = new Image();
+      img.decoding = 'async';
+      img.onload = () => resolve(img);
+      img.onerror = () => reject(new Error('decode failed'));
+      img.src = url;
+    });
   }
 
   function decodeImage(frame) {
     const cached = getCachedImage(frame);
     if (cached) return Promise.resolve(cached);
     if (decoding.has(frame.id)) return decoding.get(frame.id);
-    const p = new Promise((resolve, reject) => {
-      const img = new Image();
-      img.decoding = 'async';
-      img.onload = () => {
-        decoding.delete(frame.id);
-        imgCache.set(frame.id, { img });
-        // Evict oldest
-        while (imgCache.size > IMG_CACHE_MAX) {
-          const k = imgCache.keys().next().value;
-          imgCache.delete(k);
-        }
-        resolve(img);
-      };
-      img.onerror = () => {
-        decoding.delete(frame.id);
-        reject(new Error('decode failed'));
-      };
-      img.src = frame.url;
+    const p = decodeFrameBlob(frame.blob, frame.url).then(img => {
+      decoding.delete(frame.id);
+      imgCache.set(frame.id, { img });
+      while (imgCache.size > IMG_CACHE_MAX) {
+        const k = imgCache.keys().next().value;
+        const v = imgCache.get(k);
+        if (v && v.img && typeof v.img.close === 'function') v.img.close();
+        imgCache.delete(k);
+      }
+      return img;
+    }).catch(e => {
+      decoding.delete(frame.id);
+      throw e;
     });
     decoding.set(frame.id, p);
     return p;
   }
+
+  function prewarm(idx) {
+    if (idx < 0 || idx >= frames.length) return;
+    const f = frames[idx];
+    if (getCachedImage(f)) return;
+    decodeImage(f).catch(() => {});
+  }
+
+  const imgW = img => img ? (img.naturalWidth || img.width || 0) : 0;
+  const imgH = img => img ? (img.naturalHeight || img.height || 0) : 0;
 
   // ─── Loading ────────────────────────────────────────────────
   async function loadZip(file) {
@@ -564,17 +591,14 @@ footer code{font-family:var(--mono);font-size:11px;background:var(--soft);paddin
     const out = [];
     for (let i = 0; i < keys.length; i++) {
       const blob = await zip.files[keys[i]].async('blob');
-      // Only create blob URL — do NOT decode here.
       const url = URL.createObjectURL(blob);
       out.push({
         id: nextId++,
         name: keys[i].split('/').pop(),
-        blob,
-        url,
-        edited: null,
-        _cache: null
+        blob, url,
+        edited: null, _cache: null
       });
-      if (i % 25 === 0) {
+      if (i % 20 === 0) {
         E.source.textContent = `Extracting ZIP… ${i + 1} / ${keys.length}`;
         await yieldUI();
       }
@@ -584,13 +608,13 @@ footer code{font-family:var(--mono);font-size:11px;background:var(--soft);paddin
 
   async function load(list) {
     if (!list || !list.length) return;
-    startProgress();
-    const add = [];
     const total = list.length;
     let processed = 0;
+    const add = [];
 
     for (const f of list) {
       processed++;
+      setProgress((processed - 1) / total * 100);
       E.source.textContent = `Loading ${processed} / ${total}…`;
       await yieldUI();
 
@@ -600,15 +624,12 @@ footer code{font-family:var(--mono);font-size:11px;background:var(--soft);paddin
       } else if (f.type && f.type.startsWith('image/')) {
         const url = URL.createObjectURL(f);
         add.push({
-          id: nextId++,
-          name: f.name,
-          blob: f,
-          url,
-          edited: null,
-          _cache: null
+          id: nextId++, name: f.name, blob: f, url,
+          edited: null, _cache: null
         });
       }
     }
+    setProgress(100);
 
     add.sort((a, b) => natural(a.name, b.name));
     const wasEmpty = frames.length === 0;
@@ -617,20 +638,17 @@ footer code{font-family:var(--mono);font-size:11px;background:var(--soft);paddin
 
     E.source.textContent = `${frames.length} frame${frames.length === 1 ? '' : 's'} loaded.`;
 
-    // If mode is auto, and we just loaded the first ever frame, kick off its decode
-    // so we can detect orientation, then sync dims.
     if (wasEmpty && frames.length) {
       try { await decodeImage(frames[0]); } catch (e) {}
       if (E.mode.value === 'auto') syncDimsFromProfile();
     }
 
-    // Reset thumbnail window
     lastThumbsKey = '';
     invalidateThumbs();
-    scrollToActive();
+    scrollToActive('auto');
 
     show();
-    stopProgress();
+    setProgress(null);
     toast(`Loaded ${add.length} frame${add.length === 1 ? '' : 's'}`);
   }
 
@@ -681,6 +699,75 @@ footer code{font-family:var(--mono);font-size:11px;background:var(--soft);paddin
     return cs;
   }
 
+  // ─── Dithering ──────────────────────────────────────────────
+  function distribute(data, cols, rows, x, y, er, eg, eb, factor) {
+    if (x < 0 || x >= cols || y < 0 || y >= rows) return;
+    const i = (y * cols + x) * 4;
+    data[i] += er * factor;
+    data[i+1] += eg * factor;
+    data[i+2] += eb * factor;
+  }
+
+  function ditherFS(data, cols, rows, palette) {
+    for (let y = 0; y < rows; y++) {
+      for (let x = 0; x < cols; x++) {
+        const i = (y * cols + x) * 4;
+        const r = data[i], g = data[i+1], b = data[i+2];
+        const n = nearestColor(r, g, b, palette);
+        const er = r - n[0], eg = g - n[1], eb = b - n[2];
+        data[i] = clamp(n[0]); data[i+1] = clamp(n[1]); data[i+2] = clamp(n[2]);
+        distribute(data, cols, rows, x+1, y,   er, eg, eb, 7/16);
+        distribute(data, cols, rows, x-1, y+1, er, eg, eb, 3/16);
+        distribute(data, cols, rows, x,   y+1, er, eg, eb, 5/16);
+        distribute(data, cols, rows, x+1, y+1, er, eg, eb, 1/16);
+      }
+    }
+  }
+
+  const BAYER_4x4 = [
+    [ 0,  8,  2, 10],
+    [12,  4, 14,  6],
+    [ 3, 11,  1,  9],
+    [15,  7, 13,  5]
+  ];
+
+  function estimateGap(palette) {
+    if (palette.length < 2) return 40;
+    let total = 0, count = 0;
+    for (let i = 0; i < palette.length; i++) {
+      let minD = Infinity;
+      for (let j = 0; j < palette.length; j++) {
+        if (i === j) continue;
+        const a = palette[i], b = palette[j];
+        const d = (a[0]-b[0])*(a[0]-b[0]) + (a[1]-b[1])*(a[1]-b[1]) + (a[2]-b[2])*(a[2]-b[2]);
+        if (d < minD) minD = d;
+      }
+      total += Math.sqrt(minD); count++;
+    }
+    return count ? Math.min(80, total / count) : 40;
+  }
+
+  function ditherBayer(data, cols, rows, palette) {
+    const amp = estimateGap(palette);
+    for (let y = 0; y < rows; y++) {
+      for (let x = 0; x < cols; x++) {
+        const i = (y * cols + x) * 4;
+        const t = (BAYER_4x4[y & 3][x & 3] / 16) - 0.5;
+        const off = t * amp;
+        const n = nearestColor(data[i]+off, data[i+1]+off, data[i+2]+off, palette);
+        data[i] = clamp(n[0]); data[i+1] = clamp(n[1]); data[i+2] = clamp(n[2]);
+      }
+    }
+  }
+
+  function applyNearest(data, palette) {
+    for (let i = 0; i < data.length; i += 4) {
+      const n = nearestColor(data[i], data[i+1], data[i+2], palette);
+      data[i] = n[0]; data[i+1] = n[1]; data[i+2] = n[2];
+    }
+  }
+
+  // ─── Render ─────────────────────────────────────────────────
   let _workCanvas = null, _workCtx = null;
   function getWorkContext(w, h) {
     if (!_workCanvas) {
@@ -712,8 +799,6 @@ footer code{font-family:var(--mono);font-size:11px;background:var(--soft);paddin
     const d = imgData.data;
     const n = s.cols * s.rows;
 
-    for (let i = 3; i < d.length; i += 4) d[i] = 255;
-
     let mean = 0;
     for (let i = 0; i < d.length; i += 4) mean += lum(d[i], d[i+1], d[i+2]);
     mean /= n;
@@ -733,14 +818,16 @@ footer code{font-family:var(--mono);font-size:11px;background:var(--soft);paddin
     }
 
     const palette = s.design === 'gray' ? [] : extractPalette(d, n, s.colors);
-    const gray = new Uint8ClampedArray(n);
 
+    if (palette.length) {
+      if (s.dither === 'fs') ditherFS(d, s.cols, s.rows, palette);
+      else if (s.dither === 'bayer') ditherBayer(d, s.cols, s.rows, palette);
+      else applyNearest(d, palette);
+    }
+
+    const gray = new Uint8ClampedArray(n);
     for (let i = 0; i < n; i++) {
       const o = i * 4;
-      if (palette.length) {
-        const q = nearestColor(d[o], d[o+1], d[o+2], palette);
-        d[o] = q[0]; d[o+1] = q[1]; d[o+2] = q[2];
-      }
       gray[i] = clamp(lum(d[o], d[o+1], d[o+2]));
     }
 
@@ -757,17 +844,14 @@ footer code{font-family:var(--mono);font-size:11px;background:var(--soft);paddin
         const o = i * 4;
         const pr = d[o], pg = d[o+1], pb = d[o+2];
 
-        preview[o] = pr; preview[o+1] = pg; preview[o+2] = pb;
+        preview[o] = pr; preview[o+1] = pg; preview[o+2] = pb; preview[o+3] = 255;
 
         if (s.design === 'gray') {
           const v = gray[i];
           preview[o] = preview[o+1] = preview[o+2] = v;
-          preview[o+3] = 255;
           text += grayChars[Math.min(9, Math.floor(v * 10 / 256))];
         } else {
-          const isBg = Math.abs(pr - s.bgR) + Math.abs(pg - s.bgG) + Math.abs(pb - s.bgB) <= s.thresh;
-          preview[o+3] = isBg ? 0 : 255;
-          stops.push(hx(pr) + hx(pg) + hx(pb) + (isBg ? '00' : s.alpha));
+          stops.push(hx(pr) + hx(pg) + hx(pb) + 'ff');
           text += s.design === 'shade'
             ? shade[Math.min(3, Math.floor(gray[i] * 4 / 256))]
             : '█';
@@ -829,7 +913,6 @@ footer code{font-family:var(--mono);font-size:11px;background:var(--soft);paddin
 
     inner.style.width = (total * ITEM_W) + 'px';
 
-    // Rebuild only the visible window
     const frag = document.createDocumentFragment();
     for (let i = start; i < end; i++) {
       const f = frames[i];
@@ -887,14 +970,16 @@ footer code{font-family:var(--mono);font-size:11px;background:var(--soft);paddin
 
     if (at < 0 || !frames.length) {
       E.frameName.textContent = 'No frame loaded';
-      E.counter.textContent = '0 / 0';
-      E.output.value = '';
-      E.stats.textContent = '';
       E.badge.textContent = '—';
+      E.stats.textContent = '';
       E.palette.innerHTML = '<span class="palette-empty">No palette yet</span>';
       E.slider.disabled = true;
       E.slider.max = 0; E.slider.value = 0;
+      E.jumpInput.disabled = true;
+      E.jumpInput.value = 1;
+      E.totalFrames.textContent = '0';
       E.editFab.classList.add('hidden');
+      E.playBtn.disabled = true;
       setEmptyState('No frame loaded');
       return;
     }
@@ -903,23 +988,21 @@ footer code{font-family:var(--mono);font-size:11px;background:var(--soft);paddin
     const f = frames[curAt];
     const s = settings();
 
-    // ── Update UI chrome immediately (before async work) ────
     E.slider.max = frames.length - 1;
     E.slider.value = curAt;
     E.slider.disabled = false;
-    E.counter.textContent = `${curAt + 1} / ${frames.length}`;
-    E.badge.textContent = `${curAt + 1}/${frames.length} · ${s.cols}×${s.rows}`;
-    E.frameName.textContent = f.name + (f.edited != null ? ' · edited' : '');
+    E.jumpInput.disabled = false;
+    E.jumpInput.max = frames.length;
+    E.jumpInput.value = curAt + 1;
+    E.totalFrames.textContent = frames.length;
     E.editFab.classList.remove('hidden');
+    E.playBtn.disabled = frames.length < 2;
     E.editorSub.textContent = f.name;
 
-    // Update thumbnails window (active class)
     scheduleThumbsRender();
 
-    // ── Try cached decode first ─────────────────────────────
     let img = getCachedImage(f);
     if (!img) {
-      // Show loading placeholder, kick off decode
       setEmptyState('Decoding…', '⏳');
       try {
         img = await decodeImage(f);
@@ -928,13 +1011,12 @@ footer code{font-family:var(--mono);font-size:11px;background:var(--soft);paddin
         setEmptyState('Failed to load', '⚠');
         return;
       }
-      if (seq !== showSeq) return;  // user navigated away
+      if (seq !== showSeq) return;
     }
 
     E.stageEmpty.style.display = 'none';
     E.preview.style.display = '';
 
-    // ── Render (cached per settings key) ────────────────────
     const key = settingsKey(s);
     let r;
     if (f._cache && f._cache.key === key) {
@@ -954,6 +1036,15 @@ footer code{font-family:var(--mono);font-size:11px;background:var(--soft);paddin
     const len = text.length;
     const cls = len > 60000 ? 'bad' : len > 50000 ? 'warn' : 'ok';
     const label = len > 60000 ? 'TOO BIG' : len > 50000 ? 'CLOSE' : 'SAFE';
+
+    const sw = imgW(img), sh = imgH(img);
+    const dims = sw && sh ? ` · src ${sw}×${sh}` : '';
+    E.badge.textContent = `${curAt + 1}/${frames.length} · ${s.cols}×${s.rows}${dims}`;
+
+    E.frameName.textContent = f.name +
+      (sw && sh ? ` · ${sw}×${sh}` : '') +
+      (f.edited != null ? ' · edited' : '');
+
     E.stats.innerHTML =
       `<span>${s.cols}×${s.rows} · ${s.cols * s.rows} cells</span>` +
       `<span>${len} chars · <span class="${cls}">${label}</span></span>`;
@@ -962,29 +1053,61 @@ footer code{font-family:var(--mono);font-size:11px;background:var(--soft);paddin
     if (r.palette.length) {
       const frag = document.createDocumentFragment();
       for (const c of r.palette) {
-        const sw = document.createElement('button');
-        sw.type = 'button';
-        sw.className = 'swatch';
+        const sw2 = document.createElement('button');
+        sw2.type = 'button';
+        sw2.className = 'swatch';
         const hex = hx(c[0]) + hx(c[1]) + hx(c[2]);
-        sw.style.background = '#' + hex;
-        sw.title = '#' + hex.toUpperCase();
-        sw.setAttribute('aria-label', 'Copy colour #' + hex.toUpperCase());
-        sw.onclick = () => copyText('#' + hex.toUpperCase(), 'Colour copied');
-        frag.appendChild(sw);
+        sw2.style.background = '#' + hex;
+        sw2.title = '#' + hex.toUpperCase();
+        sw2.setAttribute('aria-label', 'Copy colour #' + hex.toUpperCase());
+        sw2.onclick = () => copyText('#' + hex.toUpperCase(), 'Colour copied');
+        frag.appendChild(sw2);
       }
       E.palette.appendChild(frag);
     } else {
       E.palette.innerHTML = '<span class="palette-empty">Grayscale — no palette</span>';
     }
+
+    // Pre-warm the next frame while idle (uses createImageBitmap so it's off-thread)
+    prewarm((curAt + 1) % frames.length);
   }
+
+  // ─── Playback ───────────────────────────────────────────────
+  function updatePlayBtn() {
+    E.playBtn.textContent = playing ? '❚❚' : '▶';
+    E.playBtn.setAttribute('aria-label', playing ? 'Pause' : 'Play');
+  }
+
+  function play() {
+    if (playing || frames.length < 2) return;
+    playing = true;
+    updatePlayBtn();
+    const interval = Math.max(50, Math.round(1000 / (+E.outFps.value || 8)));
+    playTimer = setInterval(() => {
+      at = (at + 1) % frames.length;
+      scrollToActive('auto');
+      show();
+    }, interval);
+  }
+
+  function pause() {
+    playing = false;
+    updatePlayBtn();
+    if (playTimer) { clearInterval(playTimer); playTimer = null; }
+  }
+
+  function togglePlay() { if (playing) pause(); else play(); }
+
+  E.playBtn.onclick = togglePlay;
 
   // ─── Editor ─────────────────────────────────────────────────
   function openEditor() {
     if (at < 0) return;
+    pause();
     const f = frames[at];
     const s = settings();
     const img = getCachedImage(f);
-    const auto = img && f._cache && f._cache.key === settingsKey(s)
+    const auto = (img && f._cache && f._cache.key === settingsKey(s))
       ? f._cache.result.text
       : (img ? render(img, s).text : '');
     E.output.value = f.edited != null ? f.edited : auto;
@@ -1022,7 +1145,11 @@ footer code{font-family:var(--mono);font-size:11px;background:var(--soft);paddin
     } else if (!hasEdit && dot) {
       dot.remove();
     }
-    E.frameName.textContent = frames[at].name + (hasEdit ? ' · edited' : '');
+    const img = getCachedImage(frames[at]);
+    const sw = imgW(img), sh = imgH(img);
+    E.frameName.textContent = frames[at].name +
+      (sw && sh ? ` · ${sw}×${sh}` : '') +
+      (hasEdit ? ' · edited' : '');
   }
 
   let editTimer;
@@ -1080,6 +1207,7 @@ footer code{font-family:var(--mono);font-size:11px;background:var(--soft);paddin
   // ─── ZIP download ───────────────────────────────────────────
   async function downloadRange(startIdx, endIdx, filename) {
     if (startIdx < 0 || endIdx >= frames.length) return;
+    pause();
 
     let folders = [];
     if (E.square.checked) folders.push('square');
@@ -1091,8 +1219,6 @@ footer code{font-family:var(--mono);font-size:11px;background:var(--soft);paddin
     const zip = new JSZip();
     const total = (endIdx - startIdx + 1) * folders.length;
     let done = 0;
-
-    startProgress();
 
     for (const folder of folders) {
       let prev = null;
@@ -1112,7 +1238,8 @@ footer code{font-family:var(--mono);font-size:11px;background:var(--soft);paddin
         }
         prev = text;
         done++;
-        if (done % 5 === 0) {
+        if (done % 3 === 0 || done === total) {
+          setProgress(done / total * 100);
           E.source.textContent = `Zipping ${done} / ${total}…`;
           await yieldUI();
         }
@@ -1121,13 +1248,13 @@ footer code{font-family:var(--mono);font-size:11px;background:var(--soft);paddin
       zip.file(`${folder}/meta.txt`,
         `cols=${w}\nrows=${h}\nfps=${E.outFps.value}\nsource_fps=${E.srcFps.value}\n` +
         `interval=${interval}\ntotal=${endIdx - startIdx + 1}\ndesign=${s.design}\n` +
-        `mode=${E.mode.value}\ndivider=${readDivider()}\n`
+        `dither=${s.dither}\nmode=${E.mode.value}\ndivider=${readDivider()}\n`
       );
     }
 
     const blob = await zip.generateAsync({ type: 'blob' });
     triggerDownload(blob, filename);
-    stopProgress();
+    setProgress(null);
     E.source.textContent = `${frames.length} frame${frames.length === 1 ? '' : 's'} loaded.`;
     show();
     toast('ZIP downloaded');
@@ -1162,10 +1289,13 @@ footer code{font-family:var(--mono);font-size:11px;background:var(--soft);paddin
   E.drop.addEventListener('drop', e => load(e.dataTransfer.files));
 
   E.clear.onclick = () => {
+    pause();
     frames.forEach(f => { if (f.url) URL.revokeObjectURL(f.url); });
     frames = []; at = -1; lastRender = null;
+    imgCache.forEach(v => { if (v.img && typeof v.img.close === 'function') v.img.close(); });
     imgCache.clear(); decoding.clear();
     E.source.textContent = 'No frames loaded.';
+    lastThumbsKey = '';
     invalidateThumbs();
     show();
     toast('Cleared');
@@ -1174,6 +1304,19 @@ footer code{font-family:var(--mono);font-size:11px;background:var(--soft);paddin
   E.prev.onclick = () => { if (frames.length) { at = (at + frames.length - 1) % frames.length; scrollToActive(); show(); } };
   E.next.onclick = () => { if (frames.length) { at = (at + 1) % frames.length; scrollToActive(); show(); } };
   E.slider.oninput = () => { at = +E.slider.value; scheduleShow(); };
+  E.slider.onchange = () => { prewarm(at + 1); };
+
+  E.jumpInput.onchange = () => {
+    if (!frames.length) return;
+    let v = parseInt(E.jumpInput.value, 10);
+    if (isNaN(v)) v = 1;
+    v = Math.max(1, Math.min(frames.length, v));
+    E.jumpInput.value = v;
+    at = v - 1;
+    scrollToActive();
+    show();
+  };
+  E.jumpInput.onkeydown = e => { if (e.key === 'Enter') { e.preventDefault(); E.jumpInput.blur(); } };
 
   E.thumbsInner.addEventListener('click', e => {
     const btn = e.target.closest('.thumb');
@@ -1186,15 +1329,15 @@ footer code{font-family:var(--mono);font-size:11px;background:var(--soft);paddin
   E.mode.oninput = () => { syncDimsFromProfile(); labels(); show(); };
   E.divider.oninput = () => { labels(); syncDimsFromProfile(); scheduleShow(); };
 
-  [E.design, E.cols, E.rows, E.colors, E.brightness, E.saturation, E.contrast,
-   E.bg, E.thresh, E.alpha, E.square, E.hash, E.dupes, E.outFps, E.srcFps].forEach(x => {
+  [E.design, E.dither, E.cols, E.rows, E.colors, E.brightness, E.saturation, E.contrast,
+   E.square, E.hash, E.dupes, E.outFps, E.srcFps].forEach(x => {
     x.oninput = () => { labels(); scheduleShow(); };
-    x.onchange = () => { labels(); };
+    x.onchange = () => { labels(); if (playing) { pause(); play(); } };
   });
 
   E.reset.onclick = () => {
     Object.entries(DEFAULTS).forEach(([k, v]) => { if (E[k]) E[k].value = v; });
-    frames.forEach(f => { f.edited = null; f._cache = null; });
+    frames.forEach(f => { f._cache = null; });
     labels();
     invalidateThumbs();
     show();
