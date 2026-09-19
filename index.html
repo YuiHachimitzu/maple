@@ -44,6 +44,7 @@ h1{margin:0;font-size:1.35rem;letter-spacing:-.02em;line-height:1.2}
 select,input[type=number],input[type=text]{width:100%;padding:9px 10px;background:var(--soft);border:1px solid var(--line);border-radius:6px;font:13px var(--mono);transition:border-color .15s;-webkit-appearance:none;appearance:none}
 select{background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'><path fill='%23a09ca8' d='M0 0l5 6 5-6z'/></svg>");background-repeat:no-repeat;background-position:right 10px center;padding-right:28px}
 select:focus,input[type=number]:focus,input[type=text]:focus{outline:none;border-color:var(--accent)}
+input[readonly]{opacity:.7}
 input[type=range]{width:100%;accent-color:var(--accent);height:32px;cursor:pointer;-webkit-appearance:none;appearance:none;background:transparent}
 input[type=range]::-webkit-slider-runnable-track{height:6px;background:var(--soft);border-radius:3px;border:1px solid var(--line)}
 input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:20px;height:20px;border-radius:50%;background:var(--accent);margin-top:-8px;box-shadow:0 1px 3px #0008;border:2px solid var(--bg)}
@@ -68,6 +69,16 @@ input[type=range]::-moz-range-thumb{width:18px;height:18px;border-radius:50%;bac
 .group-body{padding:14px 2px 6px;animation:groupOpen .2s ease-out}
 @keyframes groupOpen{from{opacity:0;transform:translateY(-3px)}to{opacity:1;transform:none}}
 
+/* Video panel */
+.video-panel{margin-top:12px;padding:12px;background:var(--soft);border:1px solid var(--line);border-radius:8px;animation:groupOpen .2s ease-out}
+.video-panel[hidden]{display:none}
+.video-panel video{width:100%;max-height:180px;border-radius:6px;background:#000;display:block;object-fit:contain}
+.video-meta{margin-top:8px;color:var(--muted);font:11.5px var(--mono);word-break:break-all;line-height:1.4}
+.video-est{margin:10px 0 12px;color:var(--accent);font:12px var(--mono);font-weight:600;display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.video-est.warn{color:var(--warn)}
+.video-est.bad{color:var(--bad)}
+.video-badge{background:var(--panel);border:1px solid var(--line);border-radius:4px;padding:1px 6px;font-size:10.5px;font-weight:600}
+
 .buttons{display:flex;flex-wrap:wrap;gap:8px}
 .btn{flex:1;min-width:120px;padding:11px 14px;border-radius:7px;background:var(--accent);color:#17120b;font-weight:700;font-size:13.5px;transition:filter .12s,transform .08s;text-align:center;white-space:nowrap}
 .btn:hover:not(:disabled){filter:brightness(1.08)}
@@ -76,6 +87,8 @@ input[type=range]::-moz-range-thumb{width:18px;height:18px;border-radius:50%;bac
 .btn.alt{background:transparent;border:1px solid var(--line);color:var(--text)}
 .btn.alt:hover:not(:disabled){border-color:var(--accent);color:var(--accent)}
 .btn.sm{flex:0 0 auto;min-width:0;padding:8px 14px;font-size:12.5px}
+.btn.danger{background:transparent;border:1px solid var(--bad);color:var(--bad)}
+.btn.danger:hover:not(:disabled){background:var(--bad);color:#fff;border-color:var(--bad)}
 
 .thumbs-viewport{position:relative;overflow-x:auto;overflow-y:hidden;height:70px;margin-top:12px;padding-bottom:4px;-webkit-overflow-scrolling:touch;scrollbar-width:thin;contain:strict}
 .thumbs-viewport::-webkit-scrollbar{height:6px}
@@ -147,8 +160,8 @@ input[type=range]::-moz-range-thumb{width:18px;height:18px;border-radius:50%;bac
 .progress{position:fixed;top:0;left:0;right:0;height:3px;z-index:60;pointer-events:none;opacity:0;transition:opacity .2s}
 .progress.active{opacity:1}
 .progress .bar{height:100%;width:0;background:var(--accent);transition:width .15s ease-out}
-.progress .pct{position:fixed;top:8px;left:50%;transform:translateX(-50%);background:var(--panel);border:1px solid var(--line);border-radius:99px;padding:3px 10px;font:11px var(--mono);color:var(--text);opacity:0;transition:opacity .2s;z-index:61}
-.progress.active+.pct,.progress.active~.pct{opacity:1}
+.pct{position:fixed;top:8px;left:50%;transform:translateX(-50%);background:var(--panel);border:1px solid var(--line);border-radius:99px;padding:3px 10px;font:11px var(--mono);color:var(--text);opacity:0;transition:opacity .2s;z-index:61;pointer-events:none}
+.pct.active{opacity:1}
 
 footer{border-top:1px solid var(--line);margin-top:32px;padding-top:16px;color:var(--muted);font-size:.78rem;line-height:1.55;display:flex;flex-direction:column;gap:6px}
 footer code{font-family:var(--mono);font-size:11px;background:var(--soft);padding:1px 5px;border-radius:3px;border:1px solid var(--line)}
@@ -171,6 +184,7 @@ footer code{font-family:var(--mono);font-size:11px;background:var(--soft);paddin
   .scrub{gap:5px}
   .scrub .btn.alt{padding:6px 8px;font-size:13px}
   .counter-group input{width:42px;padding:3px 5px}
+  .video-panel video{max-height:140px}
 }
 </style>
 </head>
@@ -181,7 +195,7 @@ footer code{font-family:var(--mono);font-size:11px;background:var(--soft);paddin
 <main class="app">
   <header>
     <h1>Frame → Block Text</h1>
-    <p class="lead">Upload images or a ZIP of frames. Preview the sequence, play it back, edit individual frames with ✎, then download a ZIP with <code>square/</code> and <code>hash/</code> folders.</p>
+    <p class="lead">Upload images, a ZIP, or a video. Videos are sampled into frames you can preview, play back, edit, and export alongside everything else.</p>
   </header>
 
   <div class="layout">
@@ -189,9 +203,9 @@ footer code{font-family:var(--mono);font-size:11px;background:var(--soft);paddin
       <section class="panel">
         <h2 class="title">Source frames</h2>
         <label class="drop" id="drop">
-          <strong>Choose images or ZIP</strong>
-          <small>JPG · PNG · WEBP · ZIP</small>
-          <input id="files" type="file" accept=".zip,image/*" multiple>
+          <strong>Choose images, ZIP, or video</strong>
+          <small>JPG · PNG · WEBP · ZIP · MP4 · WebM · MOV</small>
+          <input id="files" type="file" accept=".zip,image/*,video/*" multiple>
         </label>
         <div class="buttons" style="margin-top:10px">
           <button class="btn alt" id="clear" type="button" data-wide>Clear all</button>
@@ -200,6 +214,28 @@ footer code{font-family:var(--mono);font-size:11px;background:var(--soft);paddin
           <div class="thumbs-inner" id="thumbsInner"></div>
         </div>
         <p class="status thumb-status" id="source">No frames loaded.</p>
+      </section>
+
+      <!-- Video → Frames -->
+      <section class="panel" id="videoPanel" hidden>
+        <h2 class="title">Video → Frames</h2>
+        <div class="video-panel" style="margin-top:0;padding:0;background:transparent;border:0">
+          <video id="videoEl" controls playsinline muted preload="metadata"></video>
+          <div class="video-meta" id="videoMeta">—</div>
+          <div class="row" style="margin-top:12px">
+            <div class="field"><label for="vidFps">Sample FPS</label><input id="vidFps" type="number" min="1" max="60" step="1" value="10"></div>
+            <div class="field"><label>Duration</label><input id="vidDuration" type="text" readonly tabindex="-1"></div>
+          </div>
+          <div class="row">
+            <div class="field"><label for="vidStart">Start (s)</label><input id="vidStart" type="number" min="0" step="0.01" value="0"></div>
+            <div class="field"><label for="vidEnd">End (s)</label><input id="vidEnd" type="number" min="0" step="0.01" value="0"></div>
+          </div>
+          <p class="video-est" id="videoEst"></p>
+          <div class="buttons">
+            <button class="btn danger" id="vidClear" type="button">Remove video</button>
+            <button class="btn" id="vidExtract" type="button">Extract frames</button>
+          </div>
+        </div>
       </section>
 
       <section class="panel">
@@ -234,7 +270,7 @@ footer code{font-family:var(--mono);font-size:11px;background:var(--soft);paddin
         <details class="group">
           <summary>
             <span class="group-title">Design &amp; colour</span>
-            <span class="group-preview" id="designPreview">Block · 16 colours</span>
+            <span class="group-preview" id="designPreview">Block · 16c · no dither</span>
           </summary>
           <div class="group-body">
             <div class="field">
@@ -376,7 +412,9 @@ footer code{font-family:var(--mono);font-size:11px;background:var(--soft);paddin
    'palette','stats','frameName','downloadTxt','downloadPng','output','toast','editFab','editor',
    'editorSub','editorHint','editorClose','editorReset','editorCopy','editorBackdrop',
    'progressBar','progressBarFill','progressPct',
-   'sizePreview','designPreview','adjPreview','exportPreview'
+   'sizePreview','designPreview','adjPreview','exportPreview',
+   'videoPanel','videoEl','videoMeta','vidFps','vidDuration','vidStart','vidEnd','videoEst',
+   'vidClear','vidExtract'
   ].forEach(id => E[id] = $(id));
 
   // ─── State ──────────────────────────────────────────────────
@@ -389,6 +427,10 @@ footer code{font-family:var(--mono);font-size:11px;background:var(--soft);paddin
   let playing = false;
   let playTimer = null;
 
+  // Video state
+  let currentVideo = null;     // { url, name, duration, width, height }
+  let extractionToken = null;  // { cancelled }
+
   const IMG_CACHE_MAX = 10;
   const imgCache = new Map();
   const decoding = new Map();
@@ -398,6 +440,9 @@ footer code{font-family:var(--mono);font-size:11px;background:var(--soft);paddin
   const BUFFER = 4;
   let thumbsRaf = 0;
   let lastThumbsKey = '';
+
+  const VIDEO_MAX_DIM = 640;       // stored frame max edge (keeps memory sane)
+  const VIDEO_JPEG_QUALITY = 0.85;
 
   const DEFAULTS = {
     mode:'auto', divider:'1', design:'block', dither:'none', cols:'80', rows:'45',
@@ -411,6 +456,12 @@ footer code{font-family:var(--mono);font-size:11px;background:var(--soft);paddin
   const lum = (r,g,b) => 0.299*r + 0.587*g + 0.114*b;
   const natural = (a,b) => a.localeCompare(b, undefined, {numeric:true, sensitivity:'base'});
   const yieldUI = () => new Promise(r => setTimeout(r, 0));
+  const fmtTime = s => {
+    if (!isFinite(s)) return '0:00';
+    const m = Math.floor(s / 60);
+    const sec = Math.floor(s % 60);
+    return `${m}:${String(sec).padStart(2,'0')}`;
+  };
 
   function readDivider() {
     const v = Math.round(+E.divider.value || 1);
@@ -582,7 +633,7 @@ footer code{font-family:var(--mono);font-size:11px;background:var(--soft);paddin
   const imgW = img => img ? (img.naturalWidth || img.width || 0) : 0;
   const imgH = img => img ? (img.naturalHeight || img.height || 0) : 0;
 
-  // ─── Loading ────────────────────────────────────────────────
+  // ─── Image / ZIP loading ────────────────────────────────────
   async function loadZip(file) {
     const zip = await JSZip.loadAsync(file);
     const keys = Object.keys(zip.files)
@@ -606,7 +657,7 @@ footer code{font-family:var(--mono);font-size:11px;background:var(--soft);paddin
     return out;
   }
 
-  async function load(list) {
+  async function loadImages(list) {
     if (!list || !list.length) return;
     const total = list.length;
     let processed = 0;
@@ -646,11 +697,259 @@ footer code{font-family:var(--mono);font-size:11px;background:var(--soft);paddin
     lastThumbsKey = '';
     invalidateThumbs();
     scrollToActive('auto');
-
     show();
     setProgress(null);
     toast(`Loaded ${add.length} frame${add.length === 1 ? '' : 's'}`);
   }
+
+  // ─── Video → Frames ─────────────────────────────────────────
+  function seekVideoTo(video, time) {
+    return new Promise((resolve, reject) => {
+      if (video.readyState >= 2 && Math.abs(video.currentTime - time) < 0.001) {
+        resolve(); return;
+      }
+      let done = false;
+      const cleanup = () => {
+        video.removeEventListener('seeked', onSeeked);
+        video.removeEventListener('error', onErr);
+        clearTimeout(timer);
+      };
+      const onSeeked = () => { if (done) return; done = true; cleanup(); resolve(); };
+      const onErr = () => { if (done) return; done = true; cleanup(); reject(new Error('seek failed')); };
+      const timer = setTimeout(() => {
+        if (done) return;
+        done = true; cleanup();
+        resolve(); // best-effort
+      }, 3000);
+      video.addEventListener('seeked', onSeeked);
+      video.addEventListener('error', onErr);
+      try { video.currentTime = time; } catch (e) {
+        done = true; cleanup(); reject(e);
+      }
+    });
+  }
+
+  async function handleVideoFile(file) {
+    if (!file.type || !file.type.startsWith('video/')) return;
+
+    // Stop any in-progress extraction
+    if (extractionToken) { extractionToken.cancelled = true; extractionToken = null; }
+
+    // Release previous video
+    if (currentVideo && currentVideo.url) URL.revokeObjectURL(currentVideo.url);
+    if (currentVideo && currentVideo._revokeOnVideoEl) { /* noop */ }
+
+    const url = URL.createObjectURL(file);
+    const v = E.videoEl;
+    try { v.pause(); } catch (e) {}
+    v.removeAttribute('src');
+    v.load();
+    v.src = url;
+
+    // Wait for metadata
+    try {
+      await new Promise((resolve, reject) => {
+        const onMeta = () => { v.removeEventListener('loadedmetadata', onMeta); v.removeEventListener('error', onErr); resolve(); };
+        const onErr = () => { v.removeEventListener('loadedmetadata', onMeta); v.removeEventListener('error', onErr); reject(new Error('video load failed')); };
+        v.addEventListener('loadedmetadata', onMeta, { once: true });
+        v.addEventListener('error', onErr, { once: true });
+        // If metadata is already there, resolve immediately
+        if (v.readyState >= 1 && v.duration) {
+          v.removeEventListener('loadedmetadata', onMeta);
+          v.removeEventListener('error', onErr);
+          resolve();
+        }
+      });
+    } catch (e) {
+      URL.revokeObjectURL(url);
+      toast('Could not load video');
+      return;
+    }
+
+    currentVideo = {
+      url,
+      name: file.name,
+      duration: v.duration || 0,
+      width: v.videoWidth || 0,
+      height: v.videoHeight || 0
+    };
+
+    // Sensible defaults
+    E.vidStart.value = 0;
+    E.vidEnd.value = Math.round(currentVideo.duration * 100) / 100;
+    const guess = Math.max(1, Math.min(30, Math.round(+E.srcFps.value || 10)));
+    E.vidFps.value = guess;
+
+    E.videoPanel.hidden = false;
+    updateVideoMeta();
+    toast(`Loaded ${file.name}`);
+  }
+
+  function updateVideoMeta() {
+    if (!currentVideo) return;
+    const v = currentVideo;
+    const dims = v.width && v.height ? `${v.width}×${v.height}` : '—';
+    E.videoMeta.textContent = `${v.name} · ${dims} · ${fmtTime(v.duration)} (${v.duration.toFixed(2)}s)`;
+    E.vidDuration.value = v.duration.toFixed(2) + 's';
+    updateVideoEstimate();
+  }
+
+  function updateVideoEstimate() {
+    if (!currentVideo) {
+      E.videoEst.textContent = '';
+      E.videoEst.className = 'video-est';
+      return;
+    }
+    const fps = Math.max(1, Math.min(60, +E.vidFps.value || 10));
+    const start = Math.max(0, +E.vidStart.value || 0);
+    const end = Math.min(currentVideo.duration, +E.vidEnd.value || currentVideo.duration);
+    const dur = Math.max(0, end - start);
+    const n = Math.max(1, Math.floor(dur * fps));
+
+    let cls = 'video-est';
+    let note = '';
+    if (n > 5000) { cls += ' bad'; note = ' — very large, extraction will be slow'; }
+    else if (n > 1500) { cls += ' warn'; note = ' — large, extraction may take a while'; }
+
+    E.videoEst.className = cls;
+    E.videoEst.innerHTML =
+      `<span class="video-badge">≈ ${n} frame${n === 1 ? '' : 's'}</span>` +
+      `<span>${dur.toFixed(2)}s × ${fps} fps${note}</span>`;
+  }
+
+  async function extractVideoFrames(video, opts, token) {
+    const { startTime, endTime, sampleFps } = opts;
+
+    // Downsize for storage: keep max dim at 640
+    const srcW = video.videoWidth || 640;
+    const srcH = video.videoHeight || 360;
+    const scale = Math.min(1, VIDEO_MAX_DIM / Math.max(srcW, srcH));
+    const w = Math.max(2, Math.round(srcW * scale));
+    const h = Math.max(2, Math.round(srcH * scale));
+
+    const canvas = document.createElement('canvas');
+    canvas.width = w; canvas.height = h;
+    const ctx = canvas.getContext('2d', { alpha: false });
+
+    const duration = endTime - startTime;
+    const total = Math.max(1, Math.floor(duration * sampleFps));
+    const dt = duration / total;
+
+    video.pause();
+
+    const out = [];
+    for (let i = 0; i < total; i++) {
+      if (token.cancelled) throw new Error('cancelled');
+      const t = startTime + i * dt;
+      await seekVideoTo(video, Math.min(t, Math.max(0, video.duration - 0.001)));
+      if (token.cancelled) throw new Error('cancelled');
+
+      ctx.fillStyle = '#000';
+      ctx.fillRect(0, 0, w, h);
+      try { ctx.drawImage(video, 0, 0, w, h); } catch (e) {}
+
+      const blob = await new Promise(r => canvas.toBlob(r, 'image/jpeg', VIDEO_JPEG_QUALITY));
+      const url = URL.createObjectURL(blob);
+      out.push({
+        id: nextId++,
+        name: `frame_${String(i + 1).padStart(5, '0')}.jpg`,
+        blob, url, edited: null, _cache: null,
+        fromVideo: true
+      });
+
+      setProgress(((i + 1) / total) * 100);
+      E.source.textContent = `Extracting frame ${i + 1} / ${total}…`;
+      if (i % 2 === 0) await yieldUI();
+    }
+    return out;
+  }
+
+  function clearVideoFrames() {
+    const removed = frames.filter(f => f.fromVideo);
+    removed.forEach(f => { if (f.url) URL.revokeObjectURL(f.url); });
+    frames = frames.filter(f => !f.fromVideo);
+  }
+
+  async function onExtract() {
+    if (!currentVideo) return;
+    if (extractionToken) return;
+
+    const fps = Math.max(1, Math.min(60, +E.vidFps.value || 10));
+    const start = Math.max(0, +E.vidStart.value || 0);
+    const end = Math.min(currentVideo.duration, +E.vidEnd.value || currentVideo.duration);
+
+    if (end <= start) { toast('End must be after start'); return; }
+
+    const token = { cancelled: false };
+    extractionToken = token;
+
+    pause();
+    E.vidExtract.disabled = true;
+    E.vidExtract.textContent = 'Extracting…';
+    E.vidClear.disabled = true;
+    E.files.disabled = true;
+
+    try {
+      const newFrames = await extractVideoFrames(E.videoEl, {
+        startTime: start, endTime: end, sampleFps: fps
+      }, token);
+
+      if (token.cancelled) {
+        // Cleanup partial output
+        newFrames.forEach(f => { if (f.url) URL.revokeObjectURL(f.url); });
+        toast('Extraction cancelled');
+        return;
+      }
+
+      // Replace prior video frames with new ones
+      clearVideoFrames();
+      const firstIdx = frames.length;
+      frames.push(...newFrames);
+      at = firstIdx;
+
+      E.source.textContent = `${frames.length} frame${frames.length === 1 ? '' : 's'} loaded.`;
+      lastThumbsKey = '';
+      invalidateThumbs();
+      scrollToActive('auto');
+      show();
+      toast(`Extracted ${newFrames.length} frame${newFrames.length === 1 ? '' : 's'}`);
+    } catch (e) {
+      if (token.cancelled) toast('Extraction cancelled');
+      else { console.warn(e); toast('Extraction failed'); }
+    } finally {
+      extractionToken = null;
+      setProgress(null);
+      E.vidExtract.disabled = false;
+      E.vidExtract.textContent = 'Extract frames';
+      E.vidClear.disabled = false;
+      E.files.disabled = false;
+      if (frames.length) E.source.textContent = `${frames.length} frame${frames.length === 1 ? '' : 's'} loaded.`;
+    }
+  }
+
+  E.vidExtract.onclick = onExtract;
+
+  E.vidClear.onclick = () => {
+    if (extractionToken) { extractionToken.cancelled = true; extractionToken = null; }
+    if (currentVideo && currentVideo.url) URL.revokeObjectURL(currentVideo.url);
+    currentVideo = null;
+    try { E.videoEl.pause(); } catch (e) {}
+    E.videoEl.removeAttribute('src');
+    E.videoEl.load();
+    E.videoPanel.hidden = true;
+    // Also clear any already-extracted video frames
+    clearVideoFrames();
+    if (frames.length) { at = Math.min(at, frames.length - 1); at = Math.max(0, at); }
+    else at = -1;
+    lastThumbsKey = '';
+    invalidateThumbs();
+    show();
+    toast('Video removed');
+  };
+
+  E.vidFps.oninput = updateVideoEstimate;
+  E.vidStart.oninput = updateVideoEstimate;
+  E.vidEnd.oninput = updateVideoEstimate;
 
   // ─── Palette & render ───────────────────────────────────────
   function nearestColor(r, g, b, palette) {
@@ -699,7 +998,6 @@ footer code{font-family:var(--mono);font-size:11px;background:var(--soft);paddin
     return cs;
   }
 
-  // ─── Dithering ──────────────────────────────────────────────
   function distribute(data, cols, rows, x, y, er, eg, eb, factor) {
     if (x < 0 || x >= cols || y < 0 || y >= rows) return;
     const i = (y * cols + x) * 4;
@@ -767,7 +1065,6 @@ footer code{font-family:var(--mono);font-size:11px;background:var(--soft);paddin
     }
   }
 
-  // ─── Render ─────────────────────────────────────────────────
   let _workCanvas = null, _workCtx = null;
   function getWorkContext(w, h) {
     if (!_workCanvas) {
@@ -1043,6 +1340,7 @@ footer code{font-family:var(--mono);font-size:11px;background:var(--soft);paddin
 
     E.frameName.textContent = f.name +
       (sw && sh ? ` · ${sw}×${sh}` : '') +
+      (f.fromVideo ? ' · video' : '') +
       (f.edited != null ? ' · edited' : '');
 
     E.stats.innerHTML =
@@ -1068,7 +1366,6 @@ footer code{font-family:var(--mono);font-size:11px;background:var(--soft);paddin
       E.palette.innerHTML = '<span class="palette-empty">Grayscale — no palette</span>';
     }
 
-    // Pre-warm the next frame while idle (uses createImageBitmap so it's off-thread)
     prewarm((curAt + 1) % frames.length);
   }
 
@@ -1149,6 +1446,7 @@ footer code{font-family:var(--mono);font-size:11px;background:var(--soft);paddin
     const sw = imgW(img), sh = imgH(img);
     E.frameName.textContent = frames[at].name +
       (sw && sh ? ` · ${sw}×${sh}` : '') +
+      (frames[at].fromVideo ? ' · video' : '') +
       (hasEdit ? ' · edited' : '');
   }
 
@@ -1278,18 +1576,40 @@ footer code{font-family:var(--mono);font-size:11px;background:var(--soft);paddin
     }, 'image/png');
   };
 
-  // ─── Events ─────────────────────────────────────────────────
-  E.files.onchange = () => load(E.files.files);
+  // ─── File routing ───────────────────────────────────────────
+  function routeFiles(files) {
+    if (!files || !files.length) return;
+    const arr = [...files];
+    const videos = arr.filter(f => f.type && f.type.startsWith('video/'));
+    const others = arr.filter(f => !(f.type && f.type.startsWith('video/')));
+
+    if (videos.length) {
+      handleVideoFile(videos[0]);
+      if (videos.length > 1) toast('One video at a time — using first');
+    }
+    if (others.length) loadImages(others);
+  }
+
+  E.files.onchange = () => { routeFiles(E.files.files); E.files.value = ''; };
   ['dragenter','dragover'].forEach(n => E.drop.addEventListener(n, e => {
     e.preventDefault(); E.drop.classList.add('drag');
   }));
   ['dragleave','drop'].forEach(n => E.drop.addEventListener(n, e => {
     e.preventDefault(); E.drop.classList.remove('drag');
   }));
-  E.drop.addEventListener('drop', e => load(e.dataTransfer.files));
+  E.drop.addEventListener('drop', e => routeFiles(e.dataTransfer.files));
 
   E.clear.onclick = () => {
     pause();
+    if (extractionToken) { extractionToken.cancelled = true; extractionToken = null; }
+    // Stop and release video
+    if (currentVideo && currentVideo.url) URL.revokeObjectURL(currentVideo.url);
+    currentVideo = null;
+    try { E.videoEl.pause(); } catch (e) {}
+    E.videoEl.removeAttribute('src');
+    E.videoEl.load();
+    E.videoPanel.hidden = true;
+
     frames.forEach(f => { if (f.url) URL.revokeObjectURL(f.url); });
     frames = []; at = -1; lastRender = null;
     imgCache.forEach(v => { if (v.img && typeof v.img.close === 'function') v.img.close(); });
