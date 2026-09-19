@@ -2,7 +2,8 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#101116">
 <title>Frame → Block Text</title>
 <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
 <style>
@@ -10,102 +11,168 @@
   color-scheme:dark;
   --bg:#101116;--panel:#1a1b22;--soft:#252731;--line:#3a3c48;
   --text:#eeeae2;--muted:#a09ca8;--accent:#e7a13b;--ok:#66c47c;--warn:#e7c23b;--bad:#e36a61;
-  --mono:ui-monospace,SFMono-Regular,Menlo,monospace;--sans:system-ui,sans-serif;
+  --mono:ui-monospace,SFMono-Regular,Menlo,monospace;--sans:system-ui,-apple-system,sans-serif;
   --radius:10px;
+  --safe-bottom:env(safe-area-inset-bottom,0px);
 }
-*{box-sizing:border-box}
-body{margin:0;background:var(--bg);color:var(--text);font-family:var(--sans);-webkit-font-smoothing:antialiased}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{overflow-x:hidden}
+body{margin:0;background:var(--bg);color:var(--text);font-family:var(--sans);-webkit-font-smoothing:antialiased;font-size:15px;line-height:1.4}
 button,input,select,textarea{font:inherit;color:inherit}
-button{cursor:pointer}
-.app{max-width:1180px;margin:auto;padding:22px 16px 80px}
-h1{margin:0;font-size:clamp(1.45rem,4vw,2rem);letter-spacing:-.02em}
-.lead,.hint,.status,footer{color:var(--muted);font-size:.84rem;line-height:1.55}
-.lead{max-width:72ch;margin:8px 0 0}
-.lead code{font-family:var(--mono);font-size:.8rem;background:var(--soft);padding:1px 5px;border-radius:4px;border:1px solid var(--line)}
-.layout{display:grid;grid-template-columns:340px 1fr;gap:18px;margin-top:22px}
-.panel{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:15px;box-shadow:0 3px 12px #0004}
-.panel+.panel{margin-top:15px}
-.title{margin:0 0 12px;color:var(--muted);font:600 12px var(--mono);text-transform:uppercase;letter-spacing:.07em}
-.drop{display:block;border:2px dashed var(--line);border-radius:8px;padding:26px 12px;text-align:center;color:var(--muted);cursor:pointer;transition:border-color .15s,background .15s,color .15s}
+button{cursor:pointer;border:0;background:none}
+img{max-width:100%;display:block}
+.app{max-width:1180px;margin:auto;padding:16px 12px calc(96px + var(--safe-bottom))}
+h1{margin:0;font-size:1.35rem;letter-spacing:-.02em;line-height:1.2}
+.lead{color:var(--muted);font-size:.82rem;line-height:1.5;margin:8px 0 0}
+.lead code{font-family:var(--mono);font-size:.75rem;background:var(--soft);padding:1px 5px;border-radius:4px;border:1px solid var(--line)}
+.layout{display:grid;grid-template-columns:340px 1fr;gap:16px;margin-top:18px;align-items:start}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:14px;box-shadow:0 2px 10px #0003}
+.panel+.panel{margin-top:14px}
+.title{margin:0 0 12px;color:var(--muted);font:600 11px var(--mono);text-transform:uppercase;letter-spacing:.08em}
+
+/* Drop zone */
+.drop{display:block;border:2px dashed var(--line);border-radius:8px;padding:22px 12px;min-height:96px;text-align:center;color:var(--muted);cursor:pointer;transition:border-color .15s,background .15s,color .15s}
 .drop:hover,.drop.drag{border-color:var(--accent);color:var(--accent);background:#e7a13b0d}
 .drop strong,.drop small{display:block}
-.drop strong{color:var(--text);font-size:15px}
-.drop small{margin-top:6px;font-size:12px}
+.drop strong{color:var(--text);font-size:14px;margin-bottom:4px}
+.drop small{font-size:11.5px}
 .drop input{display:none}
+
+/* Fields */
 .row{display:grid;grid-template-columns:1fr 1fr;gap:9px}
 .field{margin-bottom:12px}
-.field label{display:flex;justify-content:space-between;align-items:center;margin-bottom:5px;color:var(--muted);font:12px var(--mono);gap:8px}
-.field label span{color:var(--text);background:var(--soft);padding:1px 6px;border-radius:3px;border:1px solid var(--line);font-size:11px}
-select,input[type=number],input[type=text]{width:100%;padding:8px;background:var(--soft);border:1px solid var(--line);border-radius:5px;font:12px var(--mono);transition:border-color .15s}
+.field label{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;color:var(--muted);font:12px var(--mono);gap:8px}
+.field label span{color:var(--text);background:var(--soft);padding:2px 7px;border-radius:4px;border:1px solid var(--line);font-size:11px;font-weight:600}
+select,input[type=number],input[type=text]{width:100%;padding:9px 10px;background:var(--soft);border:1px solid var(--line);border-radius:6px;font:13px var(--mono);transition:border-color .15s;-webkit-appearance:none;appearance:none}
+select{background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'><path fill='%23a09ca8' d='M0 0l5 6 5-6z'/></svg>");background-repeat:no-repeat;background-position:right 10px center;padding-right:28px}
 select:focus,input[type=number]:focus,input[type=text]:focus{outline:none;border-color:var(--accent)}
-input[type=color]{width:100%;height:35px;background:var(--soft);border:1px solid var(--line);border-radius:5px;padding:2px;cursor:pointer}
-input[type=range]{width:100%;accent-color:var(--accent);cursor:pointer}
-.checks{display:grid;gap:8px;color:var(--muted);font:12px var(--mono);margin:8px 0 13px}
-.checks label{display:flex;align-items:center;gap:8px;cursor:pointer}
-.checks input{accent-color:var(--accent)}
+input[type=color]{width:100%;height:40px;background:var(--soft);border:1px solid var(--line);border-radius:6px;padding:3px;cursor:pointer;-webkit-appearance:none;appearance:none}
+input[type=range]{width:100%;accent-color:var(--accent);height:32px;cursor:pointer;-webkit-appearance:none;appearance:none;background:transparent}
+input[type=range]::-webkit-slider-runnable-track{height:6px;background:var(--soft);border-radius:3px;border:1px solid var(--line)}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:20px;height:20px;border-radius:50%;background:var(--accent);margin-top:-8px;box-shadow:0 1px 3px #0008;border:2px solid var(--bg)}
+input[type=range]::-moz-range-track{height:6px;background:var(--soft);border-radius:3px;border:1px solid var(--line)}
+input[type=range]::-moz-range-thumb{width:18px;height:18px;border-radius:50%;background:var(--accent);box-shadow:0 1px 3px #0008;border:2px solid var(--bg)}
+.checks{display:grid;gap:2px;margin:8px 0 13px}
+.checks label{display:flex;align-items:center;gap:10px;color:var(--muted);font:12.5px var(--mono);cursor:pointer;padding:8px 0;min-height:38px}
+.checks input{accent-color:var(--accent);width:18px;height:18px;flex-shrink:0}
+.checks code{background:var(--soft);padding:1px 5px;border-radius:3px;border:1px solid var(--line);font-size:11px}
+
+/* Buttons */
 .buttons{display:flex;flex-wrap:wrap;gap:8px}
-.btn{flex:1;min-width:120px;padding:9px 11px;border:0;border-radius:5px;background:var(--accent);color:#17120b;font-weight:750;font-size:13px;transition:filter .15s,transform .1s}
+.btn{flex:1;min-width:120px;padding:11px 14px;border-radius:7px;background:var(--accent);color:#17120b;font-weight:700;font-size:13.5px;transition:filter .12s,transform .08s;text-align:center;white-space:nowrap}
 .btn:hover:not(:disabled){filter:brightness(1.08)}
-.btn:active:not(:disabled){transform:scale(.98)}
-.btn:disabled{opacity:.5;cursor:not-allowed}
+.btn:active:not(:disabled){transform:scale(.97)}
+.btn:disabled{opacity:.45;cursor:not-allowed}
 .btn.alt{background:transparent;border:1px solid var(--line);color:var(--text)}
 .btn.alt:hover:not(:disabled){border-color:var(--accent);color:var(--accent)}
-.btn.sm{flex:0 0 auto;min-width:0;padding:6px 12px;font-size:12px}
-.thumbs{display:flex;gap:7px;overflow:auto;margin-top:12px;max-height:200px;padding-bottom:4px;scrollbar-width:thin}
-.thumbs::-webkit-scrollbar{height:8px}
-.thumbs::-webkit-scrollbar-thumb{background:var(--line);border-radius:4px}
-.thumb{position:relative;min-width:56px;width:56px;height:56px;padding:0;border:2px solid var(--line);border-radius:6px;overflow:hidden;background:var(--soft);flex-shrink:0;transition:border-color .12s,transform .12s;content-visibility:auto;contain-intrinsic-size:56px 56px}
-.thumb:hover{transform:translateY(-2px)}
+.btn.sm{flex:0 0 auto;min-width:0;padding:8px 14px;font-size:12.5px}
+
+/* Thumbnails */
+.thumbs{display:flex;gap:7px;overflow-x:auto;overflow-y:hidden;margin-top:12px;padding-bottom:6px;scrollbar-width:thin;-webkit-overflow-scrolling:touch}
+.thumbs::-webkit-scrollbar{height:6px}
+.thumbs::-webkit-scrollbar-thumb{background:var(--line);border-radius:3px}
+.thumb{position:relative;min-width:58px;width:58px;height:58px;padding:0;border:2px solid var(--line);border-radius:7px;overflow:hidden;background:var(--soft);flex-shrink:0;transition:border-color .12s}
 .thumb.active{border-color:var(--accent)}
-.thumb img{width:100%;height:100%;object-fit:cover;display:block}
-.thumb em{position:absolute;bottom:0;left:0;right:0;background:#000b;color:#fff;font:9px var(--mono);font-style:normal;text-align:center;padding:1px 0}
-.thumb .edited-dot{position:absolute;top:2px;right:2px;width:7px;height:7px;border-radius:50%;background:var(--warn);box-shadow:0 0 0 1px #000a}
-.stage{min-height:230px;display:flex;align-items:center;justify-content:center;position:relative;padding:12px;border:1px solid var(--line);border-radius:8px;background:repeating-conic-gradient(var(--soft) 0 25%,transparent 0 50%) 50%/18px 18px;overflow:hidden}
-.stage canvas{width:min(100%,620px);height:auto;image-rendering:pixelated;display:block}
-.badge{position:absolute;top:8px;right:8px;background:#1a1b22dd;border:1px solid var(--line);border-radius:4px;padding:4px 7px;color:var(--muted);font:11px var(--mono)}
-.scrub{display:flex;align-items:center;gap:8px;margin-top:10px}
+.thumb img{width:100%;height:100%;object-fit:cover;pointer-events:none}
+.thumb em{position:absolute;bottom:0;left:0;right:0;background:linear-gradient(transparent,#000d);color:#fff;font:10px var(--mono);font-style:normal;text-align:center;padding:3px 0 1px}
+.thumb .edited-dot{position:absolute;top:3px;right:3px;width:8px;height:8px;border-radius:50%;background:var(--warn);box-shadow:0 0 0 1.5px #000a}
+.thumb-status{color:var(--muted);font:12px var(--mono);margin-top:8px}
+
+/* Preview */
+.stage{position:relative;border:1px solid var(--line);border-radius:8px;padding:14px;background:#0a0a0e;display:flex;align-items:center;justify-content:center;min-height:180px;overflow:hidden;background-image:linear-gradient(45deg,#1c1d24 25%,transparent 25%),linear-gradient(-45deg,#1c1d24 25%,transparent 25%),linear-gradient(45deg,transparent 75%,#1c1d24 75%),linear-gradient(-45deg,transparent 75%,#1c1d24 75%);background-size:14px 14px;background-position:0 0,0 7px,7px -7px,-7px 0}
+.stage canvas{max-width:100%;height:auto;image-rendering:pixelated;image-rendering:crisp-edges;display:block;border-radius:2px;box-shadow:0 0 0 1px #0008}
+.stage-empty{color:var(--muted);font-size:13px;text-align:center;padding:30px 10px;line-height:1.5}
+.stage-empty .big{font-size:28px;display:block;margin-bottom:6px;opacity:.4}
+.badge{position:absolute;top:8px;right:8px;background:#1a1b22e6;border:1px solid var(--line);border-radius:5px;padding:4px 8px;color:var(--muted);font:10.5px var(--mono);pointer-events:none;backdrop-filter:blur(4px)}
+
+/* Scrub */
+.scrub{display:flex;align-items:center;gap:8px;margin-top:12px}
+.scrub .btn.alt{padding:8px 12px;min-width:40px;flex:0 0 auto;font-size:16px;font-weight:400}
 .scrub input[type=range]{flex:1}
-.scrub .btn.alt{padding:4px 10px;min-width:32px;flex:0 0 auto}
-.counter,.stats{color:var(--muted);font:12px var(--mono);white-space:nowrap}
-.palette{display:flex;flex-wrap:wrap;gap:5px;margin-top:12px;min-height:24px}
-.swatch{width:24px;height:24px;border:1px solid var(--line);border-radius:4px;cursor:pointer;transition:transform .12s;position:relative}
-.swatch:hover{transform:scale(1.12);z-index:1}
-.stats{margin-top:11px;display:flex;gap:16px;flex-wrap:wrap}
+.counter{color:var(--muted);font:11.5px var(--mono);white-space:nowrap;min-width:56px;text-align:right}
+
+/* Palette + stats */
+.palette{display:flex;flex-wrap:wrap;gap:6px;margin-top:12px;min-height:26px}
+.palette-empty{color:var(--muted);font:11.5px var(--mono)}
+.swatch{width:26px;height:26px;border:1px solid var(--line);border-radius:5px;cursor:pointer;transition:transform .1s;flex-shrink:0}
+.swatch:active{transform:scale(.92)}
+.stats{margin-top:11px;color:var(--muted);font:11.5px var(--mono);display:flex;gap:14px;flex-wrap:wrap;line-height:1.5}
 .stats .ok{color:var(--ok)}
 .stats .warn{color:var(--warn)}
 .stats .bad{color:var(--bad)}
-.fab{position:fixed;bottom:24px;right:24px;width:54px;height:54px;border-radius:50%;background:var(--accent);color:#17120b;border:0;font-size:22px;box-shadow:0 6px 20px #0007,0 2px 6px #0005;z-index:40;display:flex;align-items:center;justify-content:center;transition:transform .15s,box-shadow .15s}
-.fab:hover{transform:scale(1.06);box-shadow:0 8px 24px #0009}
+
+/* FAB */
+.fab{position:fixed;bottom:calc(20px + var(--safe-bottom));right:18px;width:52px;height:52px;border-radius:50%;background:var(--accent);color:#17120b;font-size:22px;box-shadow:0 6px 20px #0008,0 2px 6px #0005;z-index:40;display:flex;align-items:center;justify-content:center;transition:transform .15s}
+.fab:active{transform:scale(.92)}
 .fab.hidden{display:none}
-.editor{position:fixed;bottom:90px;right:24px;width:min(560px,calc(100vw - 32px));height:min(520px,70vh);background:var(--panel);border:1px solid var(--line);border-radius:12px;box-shadow:0 12px 40px #000a,0 4px 12px #0006;display:flex;flex-direction:column;z-index:45;overflow:hidden;animation:pop .18s ease-out}
-@keyframes pop{from{opacity:0;transform:translateY(8px) scale(.98)}to{opacity:1;transform:none}}
-.editor[hidden]{display:none}
-.editor-head{display:flex;justify-content:space-between;align-items:center;padding:10px 14px;border-bottom:1px solid var(--line);gap:10px}
-.editor-head strong{font-size:13px;font-family:var(--mono)}
-.editor-head .sub{color:var(--muted);font-size:11px;font-family:var(--mono);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.editor-head .x{background:none;border:0;color:var(--muted);font-size:22px;line-height:1;padding:0 4px;transition:color .12s}
-.editor-head .x:hover{color:var(--text)}
-.editor textarea{flex:1;border:0;resize:none;background:var(--soft);color:var(--text);padding:12px;font:11px/1.45 var(--mono);outline:none;white-space:pre;overflow:auto}
-.editor-foot{display:flex;justify-content:space-between;align-items:center;padding:8px 12px;border-top:1px solid var(--line);gap:10px;flex-wrap:wrap}
-.editor-foot .hint{font-size:11px;color:var(--muted)}
-.editor-foot .buttons{display:flex;gap:6px;flex:0 0 auto}
-.toast{position:fixed;bottom:18px;left:50%;transform:translate(-50%,20px);opacity:0;background:var(--text);color:var(--bg);padding:9px 15px;border-radius:99px;font:12px var(--mono);transition:.2s;pointer-events:none;z-index:100;max-width:calc(100vw - 32px);box-shadow:0 6px 20px #0007}
+
+/* Editor (bottom sheet on mobile, floating card on desktop) */
+.editor-backdrop{position:fixed;inset:0;background:#000a;backdrop-filter:blur(2px);z-index:44;opacity:0;pointer-events:none;transition:opacity .2s}
+.editor-backdrop.show{opacity:1;pointer-events:auto}
+.editor{position:fixed;bottom:0;left:0;right:0;background:var(--panel);border-top:1px solid var(--line);border-radius:16px 16px 0 0;box-shadow:0 -8px 32px #000a;display:flex;flex-direction:column;z-index:45;height:78vh;max-height:calc(100vh - 60px);transform:translateY(100%);transition:transform .25s cubic-bezier(.2,.9,.3,1);padding-bottom:var(--safe-bottom)}
+.editor.open{transform:translateY(0)}
+.editor-handle{width:40px;height:4px;background:var(--line);border-radius:2px;margin:8px auto 4px;flex-shrink:0}
+.editor-head{display:flex;align-items:center;gap:10px;padding:8px 16px 10px;border-bottom:1px solid var(--line)}
+.editor-head strong{font-size:13px;font-family:var(--mono);flex-shrink:0}
+.editor-head .sub{color:var(--muted);font-size:11.5px;font-family:var(--mono);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0}
+.editor-head .x{background:var(--soft);border:1px solid var(--line);color:var(--text);width:32px;height:32px;border-radius:50%;font-size:18px;line-height:1;flex-shrink:0;display:flex;align-items:center;justify-content:center}
+.editor-head .x:active{background:var(--bad);border-color:var(--bad);color:#fff}
+.editor textarea{flex:1;border:0;resize:none;background:var(--soft);color:var(--text);padding:12px;font:11.5px/1.5 var(--mono);outline:none;white-space:pre;overflow:auto;-webkit-overflow-scrolling:touch;width:100%;min-height:0}
+.editor-foot{display:flex;align-items:center;gap:8px;padding:10px 14px;border-top:1px solid var(--line);flex-shrink:0}
+.editor-foot .hint{font-size:11px;color:var(--muted);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0}
+.editor-foot .buttons{flex:0 0 auto;gap:6px}
+.editor-foot .btn{flex:0 0 auto;min-width:0;padding:8px 14px;font-size:12.5px}
+
+/* Desktop: floating tool box */
+@media (min-width:721px){
+  .editor{bottom:24px;right:24px;left:auto;width:min(560px,calc(100vw - 48px));height:min(520px,72vh);border:1px solid var(--line);border-radius:12px;transform:translateY(20px);opacity:0;pointer-events:none;transition:transform .2s,opacity .2s;padding-bottom:0}
+  .editor.open{transform:translateY(0);opacity:1;pointer-events:auto}
+  .editor-handle{display:none}
+  .editor-head{padding:12px 16px}
+  .editor-head .x{background:none;border:0;width:auto;height:auto;font-size:22px;color:var(--muted)}
+  .editor-head .x:hover{color:var(--text)}
+  .editor-backdrop{display:none}
+}
+
+/* Toast */
+.toast{position:fixed;bottom:calc(84px + var(--safe-bottom));left:50%;transform:translate(-50%,20px);opacity:0;background:var(--text);color:var(--bg);padding:10px 18px;border-radius:99px;font:12.5px var(--mono);transition:.2s;pointer-events:none;z-index:100;max-width:calc(100vw - 32px);box-shadow:0 6px 24px #0008;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .toast.show{opacity:1;transform:translate(-50%,0)}
-.progress{position:fixed;top:0;left:0;right:0;height:3px;background:transparent;z-index:60}
-.progress .bar{height:100%;width:0;background:var(--accent);transition:width .15s}
-.progress.active .bar{width:100%;animation:progressGlow 1.4s ease-in-out infinite}
-@keyframes progressGlow{0%,100%{opacity:.6}50%{opacity:1}}
-footer{border-top:1px solid var(--line);margin-top:32px;padding-top:16px;display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px}
-@media(max-width:820px){.layout{grid-template-columns:1fr}}
-@media(max-width:520px){.app{padding:14px 10px 90px}.row{grid-template-columns:1fr}.buttons{display:grid}.btn{width:100%}.stage{min-height:180px}.fab{width:48px;height:48px;bottom:16px;right:16px;font-size:20px}.editor{bottom:76px;right:8px;left:8px;width:auto}}
+
+/* Progress */
+.progress{position:fixed;top:0;left:0;right:0;height:3px;z-index:60;pointer-events:none;opacity:0;transition:opacity .2s}
+.progress.active{opacity:1}
+.progress .bar{height:100%;width:100%;background:linear-gradient(90deg,transparent,var(--accent),transparent);animation:progressSweep 1.2s ease-in-out infinite}
+@keyframes progressSweep{0%{transform:translateX(-100%)}100%{transform:translateX(100%)}}
+
+footer{border-top:1px solid var(--line);margin-top:32px;padding-top:16px;color:var(--muted);font-size:.78rem;line-height:1.55;display:flex;flex-direction:column;gap:6px}
+footer code{font-family:var(--mono);font-size:11px;background:var(--soft);padding:1px 5px;border-radius:3px;border:1px solid var(--line)}
+
+/* Mobile */
+@media (max-width:720px){
+  .app{padding:12px 10px calc(88px + var(--safe-bottom))}
+  h1{font-size:1.2rem}
+  .lead{font-size:.78rem}
+  .layout{grid-template-columns:1fr;gap:12px;margin-top:14px}
+  .panel{padding:12px}
+  .panel+.panel{margin-top:12px}
+  .row{grid-template-columns:1fr 1fr;gap:8px}
+  .buttons{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+  .buttons .btn{width:100%;min-width:0}
+  .buttons .btn:only-child,.buttons .btn[data-wide]{grid-column:1/-1}
+  .stage{min-height:150px;padding:10px}
+  .badge{font-size:9.5px;padding:3px 6px;top:6px;right:6px}
+  .counter{font-size:11px;min-width:50px}
+  .fab{bottom:calc(14px + var(--safe-bottom));right:14px;width:48px;height:48px;font-size:20px}
+}
 </style>
 </head>
 <body>
 <div class="progress" id="progressBar"><div class="bar"></div></div>
+
 <main class="app">
   <header>
     <h1>Frame → Block Text</h1>
-    <p class="lead">Upload images or a ZIP of frames. Preview the sequence, optionally tweak any frame's markup in the floating editor (✎ bottom-right), then download a ZIP containing <code>square/</code> and <code>hash/</code> folders.</p>
+    <p class="lead">Upload images or a ZIP of frames. Preview the sequence, tap the ✎ button to edit a frame's markup, then download a ZIP containing <code>square/</code> and <code>hash/</code> folders.</p>
   </header>
 
   <div class="layout">
@@ -117,11 +184,11 @@ footer{border-top:1px solid var(--line);margin-top:32px;padding-top:16px;display
           <small>JPG · PNG · WEBP · ZIP</small>
           <input id="files" type="file" accept=".zip,image/*" multiple>
         </label>
-        <div class="buttons" style="margin-top:9px">
+        <div class="buttons" style="margin-top:10px">
           <button class="btn alt" id="clear" type="button">Clear all</button>
         </div>
         <div class="thumbs" id="thumbs"></div>
-        <p class="status" id="source">No frames loaded.</p>
+        <p class="status thumb-status" id="source">No frames loaded.</p>
       </section>
 
       <section class="panel">
@@ -148,30 +215,30 @@ footer{border-top:1px solid var(--line);margin-top:32px;padding-top:16px;display
           </select>
         </div>
         <div class="row">
-          <div class="field"><label>Cols</label><input id="cols" type="number" min="4" max="200" value="80"></div>
-          <div class="field"><label>Rows</label><input id="rows" type="number" min="4" max="200" value="45"></div>
+          <div class="field"><label for="cols">Cols</label><input id="cols" type="number" min="4" max="200" value="80"></div>
+          <div class="field"><label for="rows">Rows</label><input id="rows" type="number" min="4" max="200" value="45"></div>
         </div>
-        <div class="field"><label>Colours <span id="colorsVal">16</span></label><input id="colors" type="range" min="2" max="64" value="16"></div>
-        <div class="field"><label>Brightness <span id="brightnessVal">1.00</span></label><input id="brightness" type="range" min="0" max="200" value="100"></div>
-        <div class="field"><label>Saturation <span id="saturationVal">1.60</span></label><input id="saturation" type="range" min="0" max="300" value="160"></div>
-        <div class="field"><label>Contrast <span id="contrastVal">1.50</span></label><input id="contrast" type="range" min="0" max="300" value="150"></div>
+        <div class="field"><label for="colors">Colours <span id="colorsVal">16</span></label><input id="colors" type="range" min="2" max="64" value="16"></div>
+        <div class="field"><label for="brightness">Brightness <span id="brightnessVal">1.00</span></label><input id="brightness" type="range" min="0" max="200" value="100"></div>
+        <div class="field"><label for="saturation">Saturation <span id="saturationVal">1.60</span></label><input id="saturation" type="range" min="0" max="300" value="160"></div>
+        <div class="field"><label for="contrast">Contrast <span id="contrastVal">1.50</span></label><input id="contrast" type="range" min="0" max="300" value="150"></div>
         <div class="row">
-          <div class="field"><label>Background</label><input id="bg" type="color" value="#ffffff"></div>
-          <div class="field"><label>BG threshold <span id="threshVal">60</span></label><input id="thresh" type="range" min="0" max="255" value="60"></div>
+          <div class="field"><label for="bg">Background</label><input id="bg" type="color" value="#ffffff"></div>
+          <div class="field"><label for="thresh">BG threshold <span id="threshVal">60</span></label><input id="thresh" type="range" min="0" max="255" value="60"></div>
         </div>
-        <div class="field"><label>Alpha hex</label><input id="alpha" type="text" maxlength="2" value="ff"></div>
+        <div class="field"><label for="alpha">Alpha hex</label><input id="alpha" type="text" maxlength="2" value="ff"></div>
         <div class="checks">
           <label><input id="square" type="checkbox" checked> Export <code>square/</code> folder</label>
           <label><input id="hash" type="checkbox" checked> Export <code>hash/</code> folder</label>
           <label><input id="dupes" type="checkbox" checked> Skip consecutive duplicates</label>
         </div>
         <div class="row">
-          <div class="field"><label>Output FPS</label><input id="outFps" type="number" min="1" max="60" value="8"></div>
-          <div class="field"><label>Source FPS</label><input id="srcFps" type="number" min="1" max="240" value="30"></div>
+          <div class="field"><label for="outFps">Output FPS</label><input id="outFps" type="number" min="1" max="60" value="8"></div>
+          <div class="field"><label for="srcFps">Source FPS</label><input id="srcFps" type="number" min="1" max="240" value="30"></div>
         </div>
         <div class="buttons">
           <button class="btn alt" id="reset" type="button">Reset</button>
-          <button class="btn" id="download" type="button">Download ZIP</button>
+          <button class="btn" id="download" type="button" data-wide>Download ZIP</button>
         </div>
       </section>
     </aside>
@@ -179,24 +246,28 @@ footer{border-top:1px solid var(--line);margin-top:32px;padding-top:16px;display
     <section>
       <section class="panel">
         <h2 class="title">Frame preview</h2>
-        <div class="stage">
+        <div class="stage" id="stage">
           <canvas id="preview" width="80" height="45"></canvas>
-          <span class="badge" id="badge">No frame</span>
+          <div class="stage-empty" id="stageEmpty">
+            <span class="big">▦</span>
+            No frame loaded
+          </div>
+          <span class="badge" id="badge">—</span>
         </div>
         <div class="scrub">
           <button class="btn alt" id="prev" type="button" aria-label="Previous">‹</button>
-          <input id="slider" type="range" min="0" max="0" value="0" disabled>
+          <input id="slider" type="range" min="0" max="0" value="0" disabled aria-label="Frame slider">
           <button class="btn alt" id="next" type="button" aria-label="Next">›</button>
           <span class="counter" id="counter">0 / 0</span>
         </div>
-        <div class="palette" id="palette"></div>
+        <div class="palette" id="palette"><span class="palette-empty">No palette yet</span></div>
         <div class="stats" id="stats"></div>
       </section>
 
       <section class="panel">
         <h2 class="title">Current frame</h2>
-        <p class="status" id="frameName">No frame loaded</p>
-        <div class="buttons" style="margin-top:10px">
+        <p class="status" id="frameName" style="margin:0 0 12px">No frame loaded</p>
+        <div class="buttons">
           <button class="btn" id="downloadTxt" type="button">Download frame ZIP</button>
           <button class="btn alt" id="downloadPng" type="button">Download preview PNG</button>
         </div>
@@ -206,29 +277,32 @@ footer{border-top:1px solid var(--line);margin-top:32px;padding-top:16px;display
 
   <footer>
     <span>Frame → Block Text · all processing is local</span>
-    <span>ZIP output includes numbered TXT files + meta.txt under <code>square/</code> and <code>hash/</code></span>
+    <span>ZIP output always includes numbered TXT files + <code>meta.txt</code> under <code>square/</code> and <code>hash/</code>.</span>
   </footer>
 </main>
 
-<button class="fab hidden" id="editFab" aria-label="Edit frame text" title="Edit frame text (E)">✎</button>
+<button class="fab hidden" id="editFab" type="button" aria-label="Edit frame text">✎</button>
 
-<div class="editor" id="editor" hidden role="dialog" aria-label="Frame text editor">
+<div class="editor-backdrop" id="editorBackdrop"></div>
+
+<div class="editor" id="editor" role="dialog" aria-label="Frame text editor" aria-modal="true">
+  <div class="editor-handle"></div>
   <div class="editor-head">
-    <strong>✎ Edit frame</strong>
+    <strong>✎ Edit</strong>
     <span class="sub" id="editorSub">No frame</span>
-    <button class="x" id="editorClose" aria-label="Close">×</button>
+    <button class="x" id="editorClose" aria-label="Close editor">×</button>
   </div>
   <textarea id="output" spellcheck="false" placeholder="Markup appears here once a frame is loaded…"></textarea>
   <div class="editor-foot">
     <span class="hint" id="editorHint">Edits are saved per-frame.</span>
     <div class="buttons">
-      <button class="btn alt sm" id="editorReset" type="button">Reset to auto</button>
+      <button class="btn alt sm" id="editorReset" type="button">Reset</button>
       <button class="btn sm" id="editorCopy" type="button">Copy</button>
     </div>
   </div>
 </div>
 
-<div class="toast" id="toast"></div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
 
 <script>
 (() => {
@@ -239,31 +313,32 @@ footer{border-top:1px solid var(--line);margin-top:32px;padding-top:16px;display
   ['drop','files','clear','thumbs','source','mode','divider','dividerVal','design','cols','rows',
    'colors','colorsVal','brightness','brightnessVal','saturation','saturationVal','contrast','contrastVal',
    'bg','thresh','threshVal','alpha','square','hash','dupes','outFps','srcFps','reset','download',
-   'preview','badge','prev','next','slider','counter','palette','stats','frameName','downloadTxt',
-   'downloadPng','output','toast','editFab','editor','editorSub','editorHint','editorClose',
-   'editorReset','editorCopy','progressBar'
+   'preview','stage','stageEmpty','badge','prev','next','slider','counter','palette','stats','frameName',
+   'downloadTxt','downloadPng','output','toast','editFab','editor','editorSub','editorHint','editorClose',
+   'editorReset','editorCopy','editorBackdrop','progressBar'
   ].forEach(id => E[id] = $(id));
 
   // ─── State ──────────────────────────────────────────────────
-  let frames = [];         // { name, img, url, edited?: string, _cache?: {key, result} }
-  let at = -1;             // current frame index
-  let lastRender = null;   // for PNG export
+  let frames = [];
+  let at = -1;
+  let lastRender = null;
   let toastTimer;
-  let progressTimer;
+  let thumbsWindowStart = 0;
+  const MAX_THUMBS_RENDERED = 300;
 
-  const MAX_RENDERED_THUMBS = 400;
   const DEFAULTS = {
     mode:'auto', divider:'1', design:'block', cols:'80', rows:'45', colors:'16',
     brightness:'100', saturation:'160', contrast:'150', bg:'#ffffff', thresh:'60',
     alpha:'ff', outFps:'8', srcFps:'30'
   };
 
-  // ─── Tiny helpers ───────────────────────────────────────────
+  // ─── Helpers ────────────────────────────────────────────────
   const clamp = v => Math.max(0, Math.min(255, Math.round(v)));
   const hx = v => clamp(v).toString(16).padStart(2, '0');
   const rgb = h => { h = h.replace('#',''); return [parseInt(h.slice(0,2),16), parseInt(h.slice(2,4),16), parseInt(h.slice(4,6),16)]; };
   const lum = (r,g,b) => 0.299*r + 0.587*g + 0.114*b;
   const natural = (a,b) => a.localeCompare(b, undefined, {numeric:true, sensitivity:'base'});
+  const yieldUI = () => new Promise(r => setTimeout(r, 0));
 
   function toast(msg) {
     E.toast.textContent = msg;
@@ -272,13 +347,8 @@ footer{border-top:1px solid var(--line);margin-top:32px;padding-top:16px;display
     toastTimer = setTimeout(() => E.toast.classList.remove('show'), 2000);
   }
 
-  function startProgress() {
-    E.progressBar.classList.add('active');
-    clearTimeout(progressTimer);
-  }
-  function stopProgress() {
-    E.progressBar.classList.remove('active');
-  }
+  function startProgress() { E.progressBar.classList.add('active'); }
+  function stopProgress() { E.progressBar.classList.remove('active'); }
 
   function triggerDownload(blob, filename) {
     const a = document.createElement('a');
@@ -290,10 +360,7 @@ footer{border-top:1px solid var(--line);margin-top:32px;padding-top:16px;display
     setTimeout(() => URL.revokeObjectURL(url), 3000);
   }
 
-  // Yield to UI thread
-  const yieldUI = () => new Promise(r => setTimeout(r, 0));
-
-  // ─── Labels / settings ──────────────────────────────────────
+  // ─── Labels ─────────────────────────────────────────────────
   function labels() {
     E.colorsVal.textContent = E.colors.value;
     E.threshVal.textContent = E.thresh.value;
@@ -315,7 +382,7 @@ footer{border-top:1px solid var(--line);margin-top:32px;padding-top:16px;display
       contrast: +E.contrast.value / 100,
       bgR: b[0], bgG: b[1], bgB: b[2],
       thresh: +E.thresh.value,
-      alpha: (E.alpha.value || 'ff').replace(/[^0-9a-f]/ig, '').slice(0,2).padEnd(2,'f')
+      alpha: (E.alpha.value || 'ff').replace(/[^0-9a-f]/ig, '').slice(0,2).padEnd(2,'f') || 'ff'
     };
   }
 
@@ -324,7 +391,7 @@ footer{border-top:1px solid var(--line);margin-top:32px;padding-top:16px;display
             s.bgR, s.bgG, s.bgB, s.thresh, s.alpha].join('|');
   }
 
-  // ─── Profile (mode → dims) ──────────────────────────────────
+  // ─── Profile dims ──────────────────────────────────────────
   function effectiveMode() {
     let m = E.mode.value;
     if (m === 'auto') {
@@ -340,8 +407,8 @@ footer{border-top:1px solid var(--line);margin-top:32px;padding-top:16px;display
     const base = m === 'p' ? [45, 80] : m === 's' ? [64, 64] : [80, 45];
     const d = +E.divider.value || 1;
     return [
-      Math.max(4, Math.floor(base[0] / d)),
-      Math.max(4, Math.floor(base[1] / d))
+      Math.max(4, Math.min(200, Math.floor(base[0] / d))),
+      Math.max(4, Math.min(200, Math.floor(base[1] / d)))
     ];
   }
 
@@ -351,19 +418,19 @@ footer{border-top:1px solid var(--line);margin-top:32px;padding-top:16px;display
     E.rows.value = h;
   }
 
-  // ─── Image loading (with EXIF orientation) ──────────────────
+  // ─── Image loading (with EXIF orientation fallback) ────────
   async function loadImageFromBlob(blob) {
     const url = URL.createObjectURL(blob);
-    // Prefer createImageBitmap with orientation (fixes sideways JPEGs from ZIP)
+    // Use createImageBitmap when available for EXIF orientation support
     if (typeof createImageBitmap === 'function') {
       try {
         const bmp = await createImageBitmap(blob, { imageOrientation: 'from-image' });
-        return { img: bmp, url };
+        return { img: bmp, url, isBitmap: true };
       } catch (e) { /* fall through */ }
     }
     return new Promise((resolve, reject) => {
       const img = new Image();
-      img.onload = () => resolve({ img, url });
+      img.onload = () => resolve({ img, url, isBitmap: false });
       img.onerror = () => { URL.revokeObjectURL(url); reject(new Error('image load failed')); };
       img.src = url;
     });
@@ -378,10 +445,10 @@ footer{border-top:1px solid var(--line);margin-top:32px;padding-top:16px;display
     for (let i = 0; i < keys.length; i++) {
       const blob = await zip.files[keys[i]].async('blob');
       try {
-        const { img, url } = await loadImageFromBlob(blob);
-        out.push({ name: keys[i].split('/').pop(), img, url });
+        const { img, url, isBitmap } = await loadImageFromBlob(blob);
+        out.push({ name: keys[i].split('/').pop(), img, url, isBitmap });
       } catch (e) { /* skip bad image */ }
-      if (i % 8 === 0) {
+      if (i % 5 === 0) {
         E.source.textContent = `Extracting ZIP… ${i + 1} / ${keys.length}`;
         await yieldUI();
       }
@@ -406,8 +473,8 @@ footer{border-top:1px solid var(--line);margin-top:32px;padding-top:16px;display
         add.push(...inner);
       } else if (f.type && f.type.startsWith('image/')) {
         try {
-          const { img, url } = await loadImageFromBlob(f);
-          add.push({ name: f.name, img, url });
+          const { img, url, isBitmap } = await loadImageFromBlob(f);
+          add.push({ name: f.name, img, url, isBitmap });
         } catch (e) {}
       }
     }
@@ -417,91 +484,118 @@ footer{border-top:1px solid var(--line);margin-top:32px;padding-top:16px;display
     if (at < 0) at = 0;
 
     E.source.textContent = `${frames.length} frame${frames.length === 1 ? '' : 's'} loaded.`;
+    thumbsWindowStart = Math.max(0, at - Math.floor(MAX_THUMBS_RENDERED / 2));
     renderThumbs();
 
-    // If mode = auto, snap dims to profile
     if (E.mode.value === 'auto') syncDimsFromProfile();
 
-    // Show the just-added first frame if nothing was selected
-    if (at < 0) at = frames.length ? 0 : -1;
     show();
     stopProgress();
     toast(`Loaded ${add.length} frame${add.length === 1 ? '' : 's'}`);
   }
 
-  // ─── Palette & rendering ────────────────────────────────────
+  // ─── Palette + render ──────────────────────────────────────
   function nearestColor(r, g, b, palette) {
     let best = palette[0], bd = Infinity;
-    for (const c of palette) {
-      const d = (r-c[0])**2 + (g-c[1])**2 + (b-c[2])**2;
+    for (let i = 0; i < palette.length; i++) {
+      const c = palette[i];
+      const d = (r-c[0])*(r-c[0]) + (g-c[1])*(g-c[1]) + (b-c[2])*(b-c[2]);
       if (d < bd) { bd = d; best = c; }
     }
     return best;
   }
 
   function extractPalette(data, n, k) {
-    const pts = [];
+    const pts = new Array(n);
     const seen = new Set();
     for (let i = 0; i < n; i++) {
       const o = i * 4;
       const c = [data[o], data[o+1], data[o+2]];
-      pts.push(c);
+      pts[i] = c;
       seen.add(c.join(','));
     }
     if (seen.size <= k) return [...seen].map(x => x.split(',').map(Number));
 
     const cs = [];
-    for (let i = 0; i < k; i++) cs.push(pts[Math.floor(i * (n-1) / Math.max(1, k-1))].slice());
+    for (let i = 0; i < k; i++) {
+      cs.push(pts[Math.floor(i * (n-1) / Math.max(1, k-1))].slice());
+    }
     for (let z = 0; z < 5; z++) {
-      const sums = Array.from({length: k}, () => [0,0,0,0]);
-      for (const c of pts) {
+      const sums = new Array(k);
+      for (let i = 0; i < k; i++) sums[i] = [0,0,0,0];
+      for (let i = 0; i < n; i++) {
+        const c = pts[i];
         let bd = Infinity, bj = 0;
         for (let j = 0; j < k; j++) {
-          const d = (c[0]-cs[j][0])**2 + (c[1]-cs[j][1])**2 + (c[2]-cs[j][2])**2;
+          const cc = cs[j];
+          const d = (c[0]-cc[0])*(c[0]-cc[0]) + (c[1]-cc[1])*(c[1]-cc[1]) + (c[2]-cc[2])*(c[2]-cc[2]);
           if (d < bd) { bd = d; bj = j; }
         }
         const s = sums[bj];
         s[0] += c[0]; s[1] += c[1]; s[2] += c[2]; s[3]++;
       }
-      for (let i = 0; i < k; i++) if (sums[i][3]) cs[i] = [sums[i][0]/sums[i][3], sums[i][1]/sums[i][3], sums[i][2]/sums[i][3]];
+      for (let i = 0; i < k; i++) {
+        if (sums[i][3]) cs[i] = [sums[i][0]/sums[i][3], sums[i][1]/sums[i][3], sums[i][2]/sums[i][3]];
+      }
     }
     return cs;
   }
 
   let _workCanvas = null;
-  function getWorkCanvas() {
-    if (!_workCanvas) _workCanvas = document.createElement('canvas');
-    return _workCanvas;
+  let _workCtx = null;
+  function getWorkContext(w, h) {
+    if (!_workCanvas) {
+      _workCanvas = document.createElement('canvas');
+      _workCtx = _workCanvas.getContext('2d', { willReadFrequently: true });
+    }
+    if (_workCanvas.width !== w || _workCanvas.height !== h) {
+      _workCanvas.width = w;
+      _workCanvas.height = h;
+    } else {
+      _workCtx.clearRect(0, 0, w, h);
+    }
+    return _workCtx;
   }
 
   function render(img, s) {
-    const c = getWorkCanvas();
-    c.width = s.cols; c.height = s.rows;
-    const ctx = c.getContext('2d');
+    const ctx = getWorkContext(s.cols, s.rows);
+    ctx.imageSmoothingEnabled = true;
     ctx.imageSmoothingQuality = 'high';
-    ctx.clearRect(0, 0, s.cols, s.rows);
+    // Fill with white so transparent source pixels become white
+    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(0, 0, s.cols, s.rows);
     ctx.drawImage(img, 0, 0, s.cols, s.rows);
 
-    const d = ctx.getImageData(0, 0, s.cols, s.rows).data;
+    let imgData;
+    try {
+      imgData = ctx.getImageData(0, 0, s.cols, s.rows);
+    } catch (e) {
+      return { text: '', data: new Uint8ClampedArray(s.cols * s.rows * 4), palette: [] };
+    }
+    const d = imgData.data;
     const n = s.cols * s.rows;
 
-    // Mean luminance for contrast pivot
+    // Force alpha to 255 (we don't want source alpha)
+    for (let i = 3; i < d.length; i += 4) d[i] = 255;
+
+    // Mean luminance for contrast
     let mean = 0;
     for (let i = 0; i < d.length; i += 4) mean += lum(d[i], d[i+1], d[i+2]);
     mean /= n;
 
-    // Brightness → Saturation → Contrast (in place)
+    // Brightness → Saturation → Contrast
     for (let i = 0; i < d.length; i += 4) {
-      let r = d[i], g = d[i+1], b = d[i+2];
-      r = clamp(r * s.brightness); g = clamp(g * s.brightness); b = clamp(b * s.brightness);
+      let r = d[i] * s.brightness;
+      let g = d[i+1] * s.brightness;
+      let b = d[i+2] * s.brightness;
       const l = lum(r, g, b);
-      r = clamp(l + s.saturation * (r - l));
-      g = clamp(l + s.saturation * (g - l));
-      b = clamp(l + s.saturation * (b - l));
-      r = clamp(mean + s.contrast * (r - mean));
-      g = clamp(mean + s.contrast * (g - mean));
-      b = clamp(mean + s.contrast * (b - mean));
-      d[i] = r; d[i+1] = g; d[i+2] = b;
+      r = l + s.saturation * (r - l);
+      g = l + s.saturation * (g - l);
+      b = l + s.saturation * (b - l);
+      r = mean + s.contrast * (r - mean);
+      g = mean + s.contrast * (g - mean);
+      b = mean + s.contrast * (b - mean);
+      d[i] = clamp(r); d[i+1] = clamp(g); d[i+2] = clamp(b);
     }
 
     const palette = s.design === 'gray' ? [] : extractPalette(d, n, s.colors);
@@ -516,10 +610,11 @@ footer{border-top:1px solid var(--line);margin-top:32px;padding-top:16px;display
       gray[i] = clamp(lum(d[o], d[o+1], d[o+2]));
     }
 
-    // Build text
+    // Build text + preview
     const shade = ['░','▒','▓','█'];
     const grayChars = ' .:-=+*#%@';
     const lines = [];
+    const preview = new Uint8ClampedArray(n * 4);
 
     for (let y = 0; y < s.rows; y++) {
       let text = '';
@@ -527,11 +622,22 @@ footer{border-top:1px solid var(--line);margin-top:32px;padding-top:16px;display
       for (let x = 0; x < s.cols; x++) {
         const i = y * s.cols + x;
         const o = i * 4;
+        const pr = d[o], pg = d[o+1], pb = d[o+2];
+
+        // Copy to preview
+        preview[o] = pr;
+        preview[o+1] = pg;
+        preview[o+2] = pb;
+
         if (s.design === 'gray') {
-          text += grayChars[Math.min(9, Math.floor(gray[i] * 10 / 256))];
+          const v = gray[i];
+          preview[o] = preview[o+1] = preview[o+2] = v;
+          preview[o+3] = 255;
+          text += grayChars[Math.min(9, Math.floor(v * 10 / 256))];
         } else {
-          const isBg = Math.abs(d[o]-s.bgR) + Math.abs(d[o+1]-s.bgG) + Math.abs(d[o+2]-s.bgB) <= s.thresh;
-          stops.push(hx(d[o]) + hx(d[o+1]) + hx(d[o+2]) + (isBg ? '00' : s.alpha));
+          const isBg = Math.abs(pr - s.bgR) + Math.abs(pg - s.bgG) + Math.abs(pb - s.bgB) <= s.thresh;
+          preview[o+3] = isBg ? 0 : 255;
+          stops.push(hx(pr) + hx(pg) + hx(pb) + (isBg ? '00' : s.alpha));
           text += s.design === 'shade'
             ? shade[Math.min(3, Math.floor(gray[i] * 4 / 256))]
             : '█';
@@ -542,22 +648,6 @@ footer{border-top:1px solid var(--line);margin-top:32px;padding-top:16px;display
       } else {
         const same = stops.every(v => v === stops[0]);
         lines.push('&$[' + (same ? stops[0] : stops.join('-')) + ']$' + text + '$&');
-      }
-    }
-
-    // Build preview pixels
-    const preview = new Uint8ClampedArray(d);
-    if (s.design === 'gray') {
-      for (let i = 0; i < n; i++) {
-        const o = i * 4;
-        preview[o] = preview[o+1] = preview[o+2] = gray[i];
-        preview[o+3] = 255;
-      }
-    } else {
-      for (let i = 0; i < n; i++) {
-        const o = i * 4;
-        const isBg = Math.abs(d[o]-s.bgR) + Math.abs(d[o+1]-s.bgG) + Math.abs(d[o+2]-s.bgB) <= s.thresh;
-        if (isBg) preview[o+3] = 0;
       }
     }
 
@@ -573,25 +663,33 @@ footer{border-top:1px solid var(--line);margin-top:32px;padding-top:16px;display
   }
 
   function drawPreview(result, s) {
-    E.preview.width = s.cols;
-    E.preview.height = s.rows;
-    const ctx = E.preview.getContext('2d');
+    const c = E.preview;
+    if (c.width !== s.cols || c.height !== s.rows) {
+      c.width = s.cols;
+      c.height = s.rows;
+    }
+    const ctx = c.getContext('2d', { willReadFrequently: false });
     const imgData = ctx.createImageData(s.cols, s.rows);
-    imgData.data.set(result.data);
+    if (result.data.length === imgData.data.length) {
+      imgData.data.set(result.data);
+    }
     ctx.putImageData(imgData, 0, 0);
   }
 
-  // ─── Thumbnails (windowed) ──────────────────────────────────
+  // ─── Thumbnails ────────────────────────────────────────────
   function renderThumbs() {
     E.thumbs.innerHTML = '';
     const total = frames.length;
     if (!total) return;
 
     let start = 0, end = total;
-    if (total > MAX_RENDERED_THUMBS) {
-      start = Math.max(0, at - Math.floor(MAX_RENDERED_THUMBS / 2));
-      end = Math.min(total, start + MAX_RENDERED_THUMBS);
-      if (end - start < MAX_RENDERED_THUMBS) start = Math.max(0, end - MAX_RENDERED_THUMBS);
+    if (total > MAX_THUMBS_RENDERED) {
+      start = thumbsWindowStart;
+      end = Math.min(total, start + MAX_THUMBS_RENDERED);
+      if (end - start < MAX_THUMBS_RENDERED) {
+        start = Math.max(0, end - MAX_THUMBS_RENDERED);
+        thumbsWindowStart = start;
+      }
     }
 
     const frag = document.createDocumentFragment();
@@ -603,9 +701,9 @@ footer{border-top:1px solid var(--line);margin-top:32px;padding-top:16px;display
       b.dataset.i = i;
       b.title = f.name;
       b.innerHTML =
-        `<img src="${f.url}" loading="lazy" alt="Frame ${i+1}" decoding="async">` +
+        `<img src="${f.url}" loading="lazy" alt="" decoding="async">` +
         `<em>${i+1}</em>` +
-        (f.edited != null ? '<span class="edited-dot" title="Edited"></span>' : '');
+        (f.edited != null ? '<span class="edited-dot"></span>' : '');
       frag.appendChild(b);
     }
     E.thumbs.appendChild(frag);
@@ -613,12 +711,24 @@ footer{border-top:1px solid var(--line);margin-top:32px;padding-top:16px;display
 
   function updateThumbActive() {
     const thumbs = E.thumbs.querySelectorAll('.thumb');
-    thumbs.forEach(b => b.classList.toggle('active', +b.dataset.i === at));
+    let found = false;
+    thumbs.forEach(b => {
+      const isActive = +b.dataset.i === at;
+      b.classList.toggle('active', isActive);
+      if (isActive) found = true;
+    });
+    if (!found && frames.length > MAX_THUMBS_RENDERED) {
+      // Recenter window
+      thumbsWindowStart = Math.max(0, Math.min(frames.length - MAX_THUMBS_RENDERED, at - Math.floor(MAX_THUMBS_RENDERED / 2)));
+      renderThumbs();
+    }
     const active = E.thumbs.querySelector('.thumb.active');
-    if (active && active.scrollIntoView) active.scrollIntoView({ block: 'nearest', inline: 'nearest' });
+    if (active && active.scrollIntoView) {
+      try { active.scrollIntoView({ block: 'nearest', inline: 'center', behavior: 'smooth' }); } catch (e) { active.scrollIntoView(); }
+    }
   }
 
-  // ─── Show current frame ─────────────────────────────────────
+  // ─── Show ──────────────────────────────────────────────────
   let showScheduled = false;
   function scheduleShow() {
     if (showScheduled) return;
@@ -628,17 +738,22 @@ footer{border-top:1px solid var(--line);margin-top:32px;padding-top:16px;display
 
   function show() {
     if (at < 0 || !frames.length) {
-      E.source.textContent = frames.length ? E.source.textContent : 'No frames loaded.';
       E.frameName.textContent = 'No frame loaded';
       E.counter.textContent = '0 / 0';
       E.output.value = '';
       E.stats.textContent = '';
-      E.badge.textContent = 'No frame';
-      E.palette.innerHTML = '';
+      E.badge.textContent = '—';
+      E.palette.innerHTML = '<span class="palette-empty">No palette yet</span>';
       E.slider.disabled = true;
+      E.slider.max = 0; E.slider.value = 0;
       E.editFab.classList.add('hidden');
+      E.stageEmpty.style.display = '';
+      E.preview.style.display = 'none';
       return;
     }
+
+    E.stageEmpty.style.display = 'none';
+    E.preview.style.display = '';
 
     const s = settings();
     const f = frames[at];
@@ -647,19 +762,17 @@ footer{border-top:1px solid var(--line);margin-top:32px;padding-top:16px;display
 
     drawPreview(r, s);
 
-    // Text (edited or auto)
     const text = f.edited != null ? f.edited : r.text;
-    if (!E.editor.hidden) E.output.value = text;
+    if (!E.editor.classList.contains('open')) E.output.value = text;
+    else if (!E.output.value) E.output.value = text;
 
-    // Slider + counters
     E.slider.max = frames.length - 1;
     E.slider.value = at;
     E.slider.disabled = false;
     E.counter.textContent = `${at + 1} / ${frames.length}`;
-    E.badge.textContent = `${at + 1} / ${frames.length} · ${s.cols}×${s.rows}`;
+    E.badge.textContent = `${at + 1}/${frames.length} · ${s.cols}×${s.rows}`;
     E.frameName.textContent = f.name + (f.edited != null ? ' · edited' : '');
 
-    // Stats
     const len = text.length;
     const cls = len > 60000 ? 'bad' : len > 50000 ? 'warn' : 'ok';
     const label = len > 60000 ? 'TOO BIG' : len > 50000 ? 'CLOSE' : 'SAFE';
@@ -672,18 +785,21 @@ footer{border-top:1px solid var(--line);margin-top:32px;padding-top:16px;display
     if (r.palette.length) {
       const frag = document.createDocumentFragment();
       for (const c of r.palette) {
-        const sw = document.createElement('i');
+        const sw = document.createElement('button');
+        sw.type = 'button';
         sw.className = 'swatch';
         const hex = hx(c[0]) + hx(c[1]) + hx(c[2]);
         sw.style.background = '#' + hex;
-        sw.title = '#' + hex.toUpperCase() + ' (click to copy)';
+        sw.title = '#' + hex.toUpperCase();
+        sw.setAttribute('aria-label', 'Copy colour #' + hex.toUpperCase());
         sw.onclick = () => copyText('#' + hex.toUpperCase(), 'Colour copied');
         frag.appendChild(sw);
       }
       E.palette.appendChild(frag);
+    } else {
+      E.palette.innerHTML = '<span class="palette-empty">Grayscale — no palette</span>';
     }
 
-    // FAB + editor
     E.editFab.classList.remove('hidden');
     E.editorSub.textContent = f.name;
 
@@ -697,17 +813,43 @@ footer{border-top:1px solid var(--line);margin-top:32px;padding-top:16px;display
     const s = settings();
     const r = renderCached(f, s);
     E.output.value = f.edited != null ? f.edited : r.text;
-    E.editor.hidden = false;
+    E.editor.classList.add('open');
+    E.editorBackdrop.classList.add('show');
+    document.body.style.overflow = 'hidden';
     E.editorReset.disabled = f.edited == null;
-    E.editorHint.textContent = f.edited != null ? 'Edited — changes saved automatically.' : 'Edits are saved per-frame.';
-    setTimeout(() => E.output.focus(), 50);
+    E.editorHint.textContent = f.edited != null ? 'Edited' : 'Auto';
+    setTimeout(() => { try { E.output.focus(); } catch (e) {} }, 250);
   }
 
   function closeEditor() {
-    E.editor.hidden = true;
+    E.editor.classList.remove('open');
+    E.editorBackdrop.classList.remove('show');
+    document.body.style.overflow = '';
+    // Sync edited state on close
+    if (at >= 0) {
+      const f = frames[at];
+      const auto = renderCached(f, settings()).text;
+      f.edited = E.output.value === auto ? null : E.output.value;
+      updateThumbDot();
+      show();
+    }
   }
 
-  // Autosave edits with debounce
+  function updateThumbDot() {
+    const thumb = E.thumbs.querySelector(`.thumb[data-i="${at}"]`);
+    if (!thumb) return;
+    const dot = thumb.querySelector('.edited-dot');
+    const hasEdit = frames[at] && frames[at].edited != null;
+    if (hasEdit && !dot) {
+      const s = document.createElement('span');
+      s.className = 'edited-dot';
+      thumb.appendChild(s);
+    } else if (!hasEdit && dot) {
+      dot.remove();
+    }
+    E.frameName.textContent = frames[at].name + (hasEdit ? ' · edited' : '');
+  }
+
   let editTimer;
   E.output.addEventListener('input', () => {
     if (at < 0) return;
@@ -717,44 +859,30 @@ footer{border-top:1px solid var(--line);margin-top:32px;padding-top:16px;display
       const auto = renderCached(f, settings()).text;
       f.edited = E.output.value === auto ? null : E.output.value;
       E.editorReset.disabled = f.edited == null;
-      E.editorHint.textContent = f.edited != null ? 'Edited — changes saved automatically.' : 'Edits are saved per-frame.';
-      // Update thumb dot
-      const thumb = E.thumbs.querySelector(`.thumb[data-i="${at}"]`);
-      if (thumb) {
-        const dot = thumb.querySelector('.edited-dot');
-        if (f.edited != null && !dot) {
-          const s = document.createElement('span');
-          s.className = 'edited-dot';
-          s.title = 'Edited';
-          thumb.appendChild(s);
-        } else if (f.edited == null && dot) {
-          dot.remove();
-        }
-      }
-      E.frameName.textContent = f.name + (f.edited != null ? ' · edited' : '');
-    }, 250);
+      E.editorHint.textContent = f.edited != null ? 'Edited' : 'Auto';
+      updateThumbDot();
+    }, 300);
   });
 
   E.editFab.onclick = () => {
-    if (E.editor.hidden) openEditor();
-    else closeEditor();
+    if (E.editor.classList.contains('open')) closeEditor();
+    else openEditor();
   };
   E.editorClose.onclick = closeEditor;
+  E.editorBackdrop.onclick = closeEditor;
   E.editorReset.onclick = () => {
     if (at < 0) return;
     frames[at].edited = null;
     const auto = renderCached(frames[at], settings()).text;
     E.output.value = auto;
     E.editorReset.disabled = true;
-    E.editorHint.textContent = 'Edits are saved per-frame.';
-    const thumb = E.thumbs.querySelector(`.thumb[data-i="${at}"] .edited-dot`);
-    if (thumb) thumb.remove();
-    show();
-    toast('Frame reset to auto-generated text');
+    E.editorHint.textContent = 'Auto';
+    updateThumbDot();
+    toast('Reset to auto');
   };
   E.editorCopy.onclick = () => copyText(E.output.value, 'Markup copied');
 
-  // ─── Copy helpers ───────────────────────────────────────────
+  // ─── Copy ──────────────────────────────────────────────────
   function copyText(text, msg) {
     if (!text) return;
     if (navigator.clipboard && navigator.clipboard.writeText) {
@@ -773,13 +901,15 @@ footer{border-top:1px solid var(--line);margin-top:32px;padding-top:16px;display
     document.body.removeChild(ta);
   }
 
-  // ─── ZIP export (always both folders, always a ZIP) ─────────
+  // ─── ZIP download ──────────────────────────────────────────
   async function downloadRange(startIdx, endIdx, filename) {
     if (startIdx < 0 || endIdx >= frames.length) return;
-    const folders = [];
+
+    // Always include both folders (fall back to both if neither is checked)
+    let folders = [];
     if (E.square.checked) folders.push('square');
     if (E.hash.checked) folders.push('hash');
-    if (!folders.length) folders.push('square', 'hash');
+    if (!folders.length) folders = ['square', 'hash'];
 
     const [w, h] = profileDims();
     const s = settings(w, h);
@@ -788,7 +918,6 @@ footer{border-top:1px solid var(--line);margin-top:32px;padding-top:16px;display
     let done = 0;
 
     startProgress();
-    E.badge.textContent = 'Zipping…';
 
     for (const folder of folders) {
       let prev = null;
@@ -800,7 +929,7 @@ footer{border-top:1px solid var(--line);margin-top:32px;padding-top:16px;display
         }
         prev = text;
         done++;
-        if (done % 12 === 0) {
+        if (done % 10 === 0) {
           E.source.textContent = `Zipping ${done} / ${total}…`;
           await yieldUI();
         }
@@ -832,14 +961,14 @@ footer{border-top:1px solid var(--line);margin-top:32px;padding-top:16px;display
   };
 
   E.downloadPng.onclick = () => {
-    if (!lastRender) return toast('No frame loaded');
+    if (!lastRender || at < 0) return toast('No frame loaded');
     E.preview.toBlob(b => {
       triggerDownload(b, `frame_${String(at + 1).padStart(5, '0')}.png`);
       toast('PNG downloaded');
     }, 'image/png');
   };
 
-  // ─── Events ─────────────────────────────────────────────────
+  // ─── Events ────────────────────────────────────────────────
   E.files.onchange = () => load(E.files.files);
   ['dragenter','dragover'].forEach(n => E.drop.addEventListener(n, e => {
     e.preventDefault(); E.drop.classList.add('drag');
@@ -851,7 +980,7 @@ footer{border-top:1px solid var(--line);margin-top:32px;padding-top:16px;display
 
   E.clear.onclick = () => {
     frames.forEach(f => { if (f.url) URL.revokeObjectURL(f.url); });
-    frames = []; at = -1; lastRender = null;
+    frames = []; at = -1; lastRender = null; thumbsWindowStart = 0;
     E.source.textContent = 'No frames loaded.';
     renderThumbs();
     show();
@@ -869,11 +998,9 @@ footer{border-top:1px solid var(--line);margin-top:32px;padding-top:16px;display
     show();
   });
 
-  // Mode / divider → update dims
   E.mode.oninput = () => { syncDimsFromProfile(); labels(); show(); };
   E.divider.oninput = () => { labels(); syncDimsFromProfile(); scheduleShow(); };
 
-  // Other settings
   [E.design, E.cols, E.rows, E.colors, E.brightness, E.saturation, E.contrast,
    E.bg, E.thresh, E.alpha].forEach(x => {
     x.oninput = () => { labels(); scheduleShow(); };
@@ -881,7 +1008,6 @@ footer{border-top:1px solid var(--line);margin-top:32px;padding-top:16px;display
 
   E.reset.onclick = () => {
     Object.entries(DEFAULTS).forEach(([k, v]) => { if (E[k]) E[k].value = v; });
-    // Clear all per-frame edits and caches
     frames.forEach(f => { f.edited = null; f._cache = null; });
     labels();
     renderThumbs();
@@ -889,29 +1015,10 @@ footer{border-top:1px solid var(--line);margin-top:32px;padding-top:16px;display
     toast('Settings reset');
   };
 
-  // Keyboard shortcuts
-  document.addEventListener('keydown', e => {
-    const t = e.target;
-    const inField = t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA' || t.tagName === 'SELECT');
-    if (e.key === 'Escape' && !E.editor.hidden) { closeEditor(); return; }
-    if (inField || e.metaKey || e.ctrlKey || e.altKey) return;
-
-    if (e.key === 'e' || e.key === 'E') {
-      e.preventDefault();
-      if (E.editor.hidden) openEditor(); else closeEditor();
-    } else if (e.key === 'ArrowLeft' || e.key === 'p') {
-      E.prev.click();
-    } else if (e.key === 'ArrowRight' || e.key === 'n') {
-      E.next.click();
-    } else if (e.key === 'c' || e.key === 'C') {
-      copyText(lastRender ? (frames[at].edited != null ? frames[at].edited : lastRender.text) : '', 'Markup copied');
-    }
-  });
-
-  // ─── Init ───────────────────────────────────────────────────
+  // ─── Init ──────────────────────────────────────────────────
   labels();
   show();
 })();
 </script>
 </body>
-</html>
+  </html>
