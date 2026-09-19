@@ -12,8 +12,7 @@
   --bg:#101116;--panel:#1a1b22;--soft:#252731;--line:#3a3c48;
   --text:#eeeae2;--muted:#a09ca8;--accent:#e7a13b;--ok:#66c47c;--warn:#e7c23b;--bad:#e36a61;
   --mono:ui-monospace,SFMono-Regular,Menlo,monospace;--sans:system-ui,-apple-system,sans-serif;
-  --radius:10px;
-  --safe-bottom:env(safe-area-inset-bottom,0px);
+  --radius:10px;--safe-bottom:env(safe-area-inset-bottom,0px);
 }
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html,body{overflow-x:hidden}
@@ -30,7 +29,6 @@ h1{margin:0;font-size:1.35rem;letter-spacing:-.02em;line-height:1.2}
 .panel+.panel{margin-top:14px}
 .title{margin:0 0 12px;color:var(--muted);font:600 11px var(--mono);text-transform:uppercase;letter-spacing:.08em}
 
-/* Drop zone */
 .drop{display:block;border:2px dashed var(--line);border-radius:8px;padding:22px 12px;min-height:96px;text-align:center;color:var(--muted);cursor:pointer;transition:border-color .15s,background .15s,color .15s}
 .drop:hover,.drop.drag{border-color:var(--accent);color:var(--accent);background:#e7a13b0d}
 .drop strong,.drop small{display:block}
@@ -38,9 +36,9 @@ h1{margin:0;font-size:1.35rem;letter-spacing:-.02em;line-height:1.2}
 .drop small{font-size:11.5px}
 .drop input{display:none}
 
-/* Fields */
 .row{display:grid;grid-template-columns:1fr 1fr;gap:9px}
 .field{margin-bottom:12px}
+.field:last-child{margin-bottom:0}
 .field label{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;color:var(--muted);font:12px var(--mono);gap:8px}
 .field label span{color:var(--text);background:var(--soft);padding:2px 7px;border-radius:4px;border:1px solid var(--line);font-size:11px;font-weight:600}
 select,input[type=number],input[type=text]{width:100%;padding:9px 10px;background:var(--soft);border:1px solid var(--line);border-radius:6px;font:13px var(--mono);transition:border-color .15s;-webkit-appearance:none;appearance:none}
@@ -52,12 +50,25 @@ input[type=range]::-webkit-slider-runnable-track{height:6px;background:var(--sof
 input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:20px;height:20px;border-radius:50%;background:var(--accent);margin-top:-8px;box-shadow:0 1px 3px #0008;border:2px solid var(--bg)}
 input[type=range]::-moz-range-track{height:6px;background:var(--soft);border-radius:3px;border:1px solid var(--line)}
 input[type=range]::-moz-range-thumb{width:18px;height:18px;border-radius:50%;background:var(--accent);box-shadow:0 1px 3px #0008;border:2px solid var(--bg)}
-.checks{display:grid;gap:2px;margin:8px 0 13px}
+
+.checks{display:grid;gap:2px;margin:0}
 .checks label{display:flex;align-items:center;gap:10px;color:var(--muted);font:12.5px var(--mono);cursor:pointer;padding:8px 0;min-height:38px}
 .checks input{accent-color:var(--accent);width:18px;height:18px;flex-shrink:0}
 .checks code{background:var(--soft);padding:1px 5px;border-radius:3px;border:1px solid var(--line);font-size:11px}
 
-/* Buttons */
+.group{border-top:1px solid var(--line);margin:0}
+.group:first-of-type{border-top:0}
+.group>summary{list-style:none;cursor:pointer;padding:14px 2px;min-height:52px;display:flex;align-items:center;gap:10px;user-select:none;-webkit-user-select:none;color:var(--text);font-family:var(--mono)}
+.group>summary::-webkit-details-marker{display:none}
+.group>summary::marker{display:none}
+.group-title{font:600 12.5px var(--mono);letter-spacing:.02em;flex-shrink:0;color:var(--text)}
+.group-preview{flex:1;min-width:0;text-align:right;font:11.5px var(--mono);color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.group>summary::after{content:'';flex-shrink:0;width:7px;height:7px;border-right:2px solid var(--muted);border-bottom:2px solid var(--muted);transform:rotate(-45deg);margin-left:4px;transition:transform .2s}
+.group[open]>summary::after{transform:rotate(45deg)}
+.group[open]>summary{border-bottom:1px solid var(--line)}
+.group-body{padding:14px 2px 6px;animation:groupOpen .2s ease-out}
+@keyframes groupOpen{from{opacity:0;transform:translateY(-3px)}to{opacity:1;transform:none}}
+
 .buttons{display:flex;flex-wrap:wrap;gap:8px}
 .btn{flex:1;min-width:120px;padding:11px 14px;border-radius:7px;background:var(--accent);color:#17120b;font-weight:700;font-size:13.5px;transition:filter .12s,transform .08s;text-align:center;white-space:nowrap}
 .btn:hover:not(:disabled){filter:brightness(1.08)}
@@ -67,46 +78,42 @@ input[type=range]::-moz-range-thumb{width:18px;height:18px;border-radius:50%;bac
 .btn.alt:hover:not(:disabled){border-color:var(--accent);color:var(--accent)}
 .btn.sm{flex:0 0 auto;min-width:0;padding:8px 14px;font-size:12.5px}
 
-/* Thumbnails */
-.thumbs{display:flex;gap:7px;overflow-x:auto;overflow-y:hidden;margin-top:12px;padding-bottom:6px;scrollbar-width:thin;-webkit-overflow-scrolling:touch}
-.thumbs::-webkit-scrollbar{height:6px}
-.thumbs::-webkit-scrollbar-thumb{background:var(--line);border-radius:3px}
-.thumb{position:relative;min-width:58px;width:58px;height:58px;padding:0;border:2px solid var(--line);border-radius:7px;overflow:hidden;background:var(--soft);flex-shrink:0;transition:border-color .12s}
+/* Virtualized thumbnail strip */
+.thumbs-viewport{position:relative;overflow-x:auto;overflow-y:hidden;height:70px;margin-top:12px;padding-bottom:4px;-webkit-overflow-scrolling:touch;scrollbar-width:thin;contain:strict}
+.thumbs-viewport::-webkit-scrollbar{height:6px}
+.thumbs-viewport::-webkit-scrollbar-thumb{background:var(--line);border-radius:3px}
+.thumbs-inner{position:relative;height:62px;min-width:100%}
+.thumb{position:absolute;top:0;width:58px;height:58px;padding:0;border:2px solid var(--line);border-radius:7px;overflow:hidden;background:var(--soft);transition:border-color .12s}
 .thumb.active{border-color:var(--accent)}
 .thumb img{width:100%;height:100%;object-fit:cover;pointer-events:none}
 .thumb em{position:absolute;bottom:0;left:0;right:0;background:linear-gradient(transparent,#000d);color:#fff;font:10px var(--mono);font-style:normal;text-align:center;padding:3px 0 1px}
 .thumb .edited-dot{position:absolute;top:3px;right:3px;width:8px;height:8px;border-radius:50%;background:var(--warn);box-shadow:0 0 0 1.5px #000a}
 .thumb-status{color:var(--muted);font:12px var(--mono);margin-top:8px}
 
-/* Preview */
 .stage{position:relative;border:1px solid var(--line);border-radius:8px;padding:14px;background:#0a0a0e;display:flex;align-items:center;justify-content:center;min-height:180px;overflow:hidden;background-image:linear-gradient(45deg,#1c1d24 25%,transparent 25%),linear-gradient(-45deg,#1c1d24 25%,transparent 25%),linear-gradient(45deg,transparent 75%,#1c1d24 75%),linear-gradient(-45deg,transparent 75%,#1c1d24 75%);background-size:14px 14px;background-position:0 0,0 7px,7px -7px,-7px 0}
 .stage canvas{max-width:100%;height:auto;image-rendering:pixelated;image-rendering:crisp-edges;display:block;border-radius:2px;box-shadow:0 0 0 1px #0008}
 .stage-empty{color:var(--muted);font-size:13px;text-align:center;padding:30px 10px;line-height:1.5}
 .stage-empty .big{font-size:28px;display:block;margin-bottom:6px;opacity:.4}
 .badge{position:absolute;top:8px;right:8px;background:#1a1b22e6;border:1px solid var(--line);border-radius:5px;padding:4px 8px;color:var(--muted);font:10.5px var(--mono);pointer-events:none;backdrop-filter:blur(4px)}
 
-/* Scrub */
 .scrub{display:flex;align-items:center;gap:8px;margin-top:12px}
 .scrub .btn.alt{padding:8px 12px;min-width:40px;flex:0 0 auto;font-size:16px;font-weight:400}
 .scrub input[type=range]{flex:1}
 .counter{color:var(--muted);font:11.5px var(--mono);white-space:nowrap;min-width:56px;text-align:right}
 
-/* Palette + stats */
 .palette{display:flex;flex-wrap:wrap;gap:6px;margin-top:12px;min-height:26px}
 .palette-empty{color:var(--muted);font:11.5px var(--mono)}
-.swatch{width:26px;height:26px;border:1px solid var(--line);border-radius:5px;cursor:pointer;transition:transform .1s;flex-shrink:0}
+.swatch{width:26px;height:26px;border:1px solid var(--line);border-radius:5px;cursor:pointer;transition:transform .1s;flex-shrink:0;padding:0}
 .swatch:active{transform:scale(.92)}
 .stats{margin-top:11px;color:var(--muted);font:11.5px var(--mono);display:flex;gap:14px;flex-wrap:wrap;line-height:1.5}
 .stats .ok{color:var(--ok)}
 .stats .warn{color:var(--warn)}
 .stats .bad{color:var(--bad)}
 
-/* FAB */
 .fab{position:fixed;bottom:calc(20px + var(--safe-bottom));right:18px;width:52px;height:52px;border-radius:50%;background:var(--accent);color:#17120b;font-size:22px;box-shadow:0 6px 20px #0008,0 2px 6px #0005;z-index:40;display:flex;align-items:center;justify-content:center;transition:transform .15s}
 .fab:active{transform:scale(.92)}
 .fab.hidden{display:none}
 
-/* Editor (bottom sheet on mobile, floating card on desktop) */
 .editor-backdrop{position:fixed;inset:0;background:#000a;backdrop-filter:blur(2px);z-index:44;opacity:0;pointer-events:none;transition:opacity .2s}
 .editor-backdrop.show{opacity:1;pointer-events:auto}
 .editor{position:fixed;bottom:0;left:0;right:0;background:var(--panel);border-top:1px solid var(--line);border-radius:16px 16px 0 0;box-shadow:0 -8px 32px #000a;display:flex;flex-direction:column;z-index:45;height:78vh;max-height:calc(100vh - 60px);transform:translateY(100%);transition:transform .25s cubic-bezier(.2,.9,.3,1);padding-bottom:var(--safe-bottom)}
@@ -123,7 +130,6 @@ input[type=range]::-moz-range-thumb{width:18px;height:18px;border-radius:50%;bac
 .editor-foot .buttons{flex:0 0 auto;gap:6px}
 .editor-foot .btn{flex:0 0 auto;min-width:0;padding:8px 14px;font-size:12.5px}
 
-/* Desktop: floating tool box */
 @media (min-width:721px){
   .editor{bottom:24px;right:24px;left:auto;width:min(560px,calc(100vw - 48px));height:min(520px,72vh);border:1px solid var(--line);border-radius:12px;transform:translateY(20px);opacity:0;pointer-events:none;transition:transform .2s,opacity .2s;padding-bottom:0}
   .editor.open{transform:translateY(0);opacity:1;pointer-events:auto}
@@ -134,11 +140,9 @@ input[type=range]::-moz-range-thumb{width:18px;height:18px;border-radius:50%;bac
   .editor-backdrop{display:none}
 }
 
-/* Toast */
 .toast{position:fixed;bottom:calc(84px + var(--safe-bottom));left:50%;transform:translate(-50%,20px);opacity:0;background:var(--text);color:var(--bg);padding:10px 18px;border-radius:99px;font:12.5px var(--mono);transition:.2s;pointer-events:none;z-index:100;max-width:calc(100vw - 32px);box-shadow:0 6px 24px #0008;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .toast.show{opacity:1;transform:translate(-50%,0)}
 
-/* Progress */
 .progress{position:fixed;top:0;left:0;right:0;height:3px;z-index:60;pointer-events:none;opacity:0;transition:opacity .2s}
 .progress.active{opacity:1}
 .progress .bar{height:100%;width:100%;background:linear-gradient(90deg,transparent,var(--accent),transparent);animation:progressSweep 1.2s ease-in-out infinite}
@@ -147,22 +151,22 @@ input[type=range]::-moz-range-thumb{width:18px;height:18px;border-radius:50%;bac
 footer{border-top:1px solid var(--line);margin-top:32px;padding-top:16px;color:var(--muted);font-size:.78rem;line-height:1.55;display:flex;flex-direction:column;gap:6px}
 footer code{font-family:var(--mono);font-size:11px;background:var(--soft);padding:1px 5px;border-radius:3px;border:1px solid var(--line)}
 
-/* Mobile */
 @media (max-width:720px){
   .app{padding:12px 10px calc(88px + var(--safe-bottom))}
   h1{font-size:1.2rem}
   .lead{font-size:.78rem}
   .layout{grid-template-columns:1fr;gap:12px;margin-top:14px}
-  .panel{padding:12px}
+  .panel{padding:10px 12px}
   .panel+.panel{margin-top:12px}
-  .row{grid-template-columns:1fr 1fr;gap:8px}
   .buttons{display:grid;grid-template-columns:1fr 1fr;gap:8px}
   .buttons .btn{width:100%;min-width:0}
-  .buttons .btn:only-child,.buttons .btn[data-wide]{grid-column:1/-1}
+  .buttons .btn[data-wide]{grid-column:1/-1}
   .stage{min-height:150px;padding:10px}
   .badge{font-size:9.5px;padding:3px 6px;top:6px;right:6px}
   .counter{font-size:11px;min-width:50px}
   .fab{bottom:calc(14px + var(--safe-bottom));right:14px;width:48px;height:48px;font-size:20px}
+  .group>summary{padding:13px 2px}
+  .group-preview{font-size:11px}
 }
 </style>
 </head>
@@ -172,7 +176,7 @@ footer code{font-family:var(--mono);font-size:11px;background:var(--soft);paddin
 <main class="app">
   <header>
     <h1>Frame → Block Text</h1>
-    <p class="lead">Upload images or a ZIP of frames. Preview the sequence, tap the ✎ button to edit a frame's markup, then download a ZIP containing <code>square/</code> and <code>hash/</code> folders.</p>
+    <p class="lead">Upload images or a ZIP of frames. Preview the sequence, tap ✎ to edit a frame's markup, then download a ZIP with <code>square/</code> and <code>hash/</code> folders.</p>
   </header>
 
   <div class="layout">
@@ -185,58 +189,109 @@ footer code{font-family:var(--mono);font-size:11px;background:var(--soft);paddin
           <input id="files" type="file" accept=".zip,image/*" multiple>
         </label>
         <div class="buttons" style="margin-top:10px">
-          <button class="btn alt" id="clear" type="button">Clear all</button>
+          <button class="btn alt" id="clear" type="button" data-wide>Clear all</button>
         </div>
-        <div class="thumbs" id="thumbs"></div>
+        <div class="thumbs-viewport" id="thumbsViewport" aria-label="Frame thumbnails">
+          <div class="thumbs-inner" id="thumbsInner"></div>
+        </div>
         <p class="status thumb-status" id="source">No frames loaded.</p>
       </section>
 
       <section class="panel">
         <h2 class="title">Conversion profile</h2>
-        <div class="field">
-          <label for="mode">Orientation</label>
-          <select id="mode">
-            <option value="auto">Auto detect</option>
-            <option value="l">Landscape (80×45)</option>
-            <option value="p">Portrait (45×80)</option>
-            <option value="s">Square (64×64)</option>
-          </select>
-        </div>
-        <div class="field">
-          <label for="divider">Resolution divider <span id="dividerVal">1.00</span></label>
-          <input id="divider" type="range" min=".5" max="4" step=".05" value="1">
-        </div>
-        <div class="field">
-          <label for="design">Design</label>
-          <select id="design">
-            <option value="block">Block — █</option>
-            <option value="shade">Shade — ░▒▓█</option>
-            <option value="gray">Gray ramp</option>
-          </select>
-        </div>
-        <div class="row">
-          <div class="field"><label for="cols">Cols</label><input id="cols" type="number" min="4" max="200" value="80"></div>
-          <div class="field"><label for="rows">Rows</label><input id="rows" type="number" min="4" max="200" value="45"></div>
-        </div>
-        <div class="field"><label for="colors">Colours <span id="colorsVal">16</span></label><input id="colors" type="range" min="2" max="64" value="16"></div>
-        <div class="field"><label for="brightness">Brightness <span id="brightnessVal">1.00</span></label><input id="brightness" type="range" min="0" max="200" value="100"></div>
-        <div class="field"><label for="saturation">Saturation <span id="saturationVal">1.60</span></label><input id="saturation" type="range" min="0" max="300" value="160"></div>
-        <div class="field"><label for="contrast">Contrast <span id="contrastVal">1.50</span></label><input id="contrast" type="range" min="0" max="300" value="150"></div>
-        <div class="row">
-          <div class="field"><label for="bg">Background</label><input id="bg" type="color" value="#ffffff"></div>
-          <div class="field"><label for="thresh">BG threshold <span id="threshVal">60</span></label><input id="thresh" type="range" min="0" max="255" value="60"></div>
-        </div>
-        <div class="field"><label for="alpha">Alpha hex</label><input id="alpha" type="text" maxlength="2" value="ff"></div>
-        <div class="checks">
-          <label><input id="square" type="checkbox" checked> Export <code>square/</code> folder</label>
-          <label><input id="hash" type="checkbox" checked> Export <code>hash/</code> folder</label>
-          <label><input id="dupes" type="checkbox" checked> Skip consecutive duplicates</label>
-        </div>
-        <div class="row">
-          <div class="field"><label for="outFps">Output FPS</label><input id="outFps" type="number" min="1" max="60" value="8"></div>
-          <div class="field"><label for="srcFps">Source FPS</label><input id="srcFps" type="number" min="1" max="240" value="30"></div>
-        </div>
-        <div class="buttons">
+
+        <details class="group">
+          <summary>
+            <span class="group-title">Size &amp; orientation</span>
+            <span class="group-preview" id="sizePreview">80×45 · Auto</span>
+          </summary>
+          <div class="group-body">
+            <div class="field">
+              <label for="mode">Orientation</label>
+              <select id="mode">
+                <option value="auto">Auto detect</option>
+                <option value="l">Landscape (80×45)</option>
+                <option value="p">Portrait (45×80)</option>
+                <option value="s">Square (64×64)</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="divider">Resolution divider <span id="dividerVal">1</span></label>
+              <input id="divider" type="range" min="1" max="4" step="1" value="1">
+            </div>
+            <div class="row">
+              <div class="field"><label for="cols">Cols</label><input id="cols" type="number" min="4" max="200" value="80"></div>
+              <div class="field"><label for="rows">Rows</label><input id="rows" type="number" min="4" max="200" value="45"></div>
+            </div>
+          </div>
+        </details>
+
+        <details class="group">
+          <summary>
+            <span class="group-title">Design &amp; colour</span>
+            <span class="group-preview" id="designPreview">Block · 16 colours</span>
+          </summary>
+          <div class="group-body">
+            <div class="field">
+              <label for="design">Design</label>
+              <select id="design">
+                <option value="block">Block — █</option>
+                <option value="shade">Shade — ░▒▓█</option>
+                <option value="gray">Gray ramp</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="colors">Colours <span id="colorsVal">16</span></label>
+              <input id="colors" type="range" min="2" max="64" value="16">
+            </div>
+          </div>
+        </details>
+
+        <details class="group">
+          <summary>
+            <span class="group-title">Adjustments</span>
+            <span class="group-preview" id="adjPreview">B 1.00 · S 1.60 · C 1.50</span>
+          </summary>
+          <div class="group-body">
+            <div class="field"><label for="brightness">Brightness <span id="brightnessVal">1.00</span></label><input id="brightness" type="range" min="0" max="200" value="100"></div>
+            <div class="field"><label for="saturation">Saturation <span id="saturationVal">1.60</span></label><input id="saturation" type="range" min="0" max="300" value="160"></div>
+            <div class="field"><label for="contrast">Contrast <span id="contrastVal">1.50</span></label><input id="contrast" type="range" min="0" max="300" value="150"></div>
+          </div>
+        </details>
+
+        <details class="group">
+          <summary>
+            <span class="group-title">Background &amp; alpha</span>
+            <span class="group-preview" id="bgPreview">#ffffff · α 60</span>
+          </summary>
+          <div class="group-body">
+            <div class="row">
+              <div class="field"><label for="bg">Background</label><input id="bg" type="color" value="#ffffff"></div>
+              <div class="field"><label for="thresh">BG threshold <span id="threshVal">60</span></label><input id="thresh" type="range" min="0" max="255" value="60"></div>
+            </div>
+            <div class="field"><label for="alpha">Alpha hex</label><input id="alpha" type="text" maxlength="2" value="ff"></div>
+          </div>
+        </details>
+
+        <details class="group">
+          <summary>
+            <span class="group-title">Export options</span>
+            <span class="group-preview" id="exportPreview">square · hash · dupes</span>
+          </summary>
+          <div class="group-body">
+            <div class="checks">
+              <label><input id="square" type="checkbox" checked> Export <code>square/</code> folder</label>
+              <label><input id="hash" type="checkbox" checked> Export <code>hash/</code> folder</label>
+              <label><input id="dupes" type="checkbox" checked> Skip consecutive duplicates</label>
+            </div>
+            <div class="row" style="margin-top:10px">
+              <div class="field"><label for="outFps">Output FPS</label><input id="outFps" type="number" min="1" max="60" value="8"></div>
+              <div class="field"><label for="srcFps">Source FPS</label><input id="srcFps" type="number" min="1" max="240" value="30"></div>
+            </div>
+          </div>
+        </details>
+
+        <div class="buttons" style="margin-top:14px">
           <button class="btn alt" id="reset" type="button">Reset</button>
           <button class="btn" id="download" type="button" data-wide>Download ZIP</button>
         </div>
@@ -294,7 +349,7 @@ footer code{font-family:var(--mono);font-size:11px;background:var(--soft);paddin
   </div>
   <textarea id="output" spellcheck="false" placeholder="Markup appears here once a frame is loaded…"></textarea>
   <div class="editor-foot">
-    <span class="hint" id="editorHint">Edits are saved per-frame.</span>
+    <span class="hint" id="editorHint">Auto</span>
     <div class="buttons">
       <button class="btn alt sm" id="editorReset" type="button">Reset</button>
       <button class="btn sm" id="editorCopy" type="button">Copy</button>
@@ -310,21 +365,34 @@ footer code{font-family:var(--mono);font-size:11px;background:var(--soft);paddin
 
   const $ = id => document.getElementById(id);
   const E = {};
-  ['drop','files','clear','thumbs','source','mode','divider','dividerVal','design','cols','rows',
+  ['drop','files','clear','thumbsViewport','thumbsInner','source','mode','divider','dividerVal','design','cols','rows',
    'colors','colorsVal','brightness','brightnessVal','saturation','saturationVal','contrast','contrastVal',
    'bg','thresh','threshVal','alpha','square','hash','dupes','outFps','srcFps','reset','download',
    'preview','stage','stageEmpty','badge','prev','next','slider','counter','palette','stats','frameName',
    'downloadTxt','downloadPng','output','toast','editFab','editor','editorSub','editorHint','editorClose',
-   'editorReset','editorCopy','editorBackdrop','progressBar'
+   'editorReset','editorCopy','editorBackdrop','progressBar',
+   'sizePreview','designPreview','adjPreview','bgPreview','exportPreview'
   ].forEach(id => E[id] = $(id));
 
   // ─── State ──────────────────────────────────────────────────
-  let frames = [];
+  let frames = [];       // { id, name, blob, url, edited, _cache }
   let at = -1;
   let lastRender = null;
   let toastTimer;
-  let thumbsWindowStart = 0;
-  const MAX_THUMBS_RENDERED = 300;
+  let nextId = 0;
+  let showSeq = 0;
+
+  // Decoded-image LRU cache — only keeps a handful in memory
+  const IMG_CACHE_MAX = 8;
+  const imgCache = new Map();  // frameId -> { img }
+  const decoding = new Map();  // frameId -> Promise<img>
+
+  // Thumbnail virtualization
+  const THUMB_W = 58, THUMB_GAP = 7;
+  const ITEM_W = THUMB_W + THUMB_GAP;
+  const BUFFER = 4;
+  let thumbsRaf = 0;
+  let lastThumbsKey = '';
 
   const DEFAULTS = {
     mode:'auto', divider:'1', design:'block', cols:'80', rows:'45', colors:'16',
@@ -332,7 +400,7 @@ footer code{font-family:var(--mono);font-size:11px;background:var(--soft);paddin
     alpha:'ff', outFps:'8', srcFps:'30'
   };
 
-  // ─── Helpers ────────────────────────────────────────────────
+  // ─── Utils ──────────────────────────────────────────────────
   const clamp = v => Math.max(0, Math.min(255, Math.round(v)));
   const hx = v => clamp(v).toString(16).padStart(2, '0');
   const rgb = h => { h = h.replace('#',''); return [parseInt(h.slice(0,2),16), parseInt(h.slice(2,4),16), parseInt(h.slice(4,6),16)]; };
@@ -340,13 +408,17 @@ footer code{font-family:var(--mono);font-size:11px;background:var(--soft);paddin
   const natural = (a,b) => a.localeCompare(b, undefined, {numeric:true, sensitivity:'base'});
   const yieldUI = () => new Promise(r => setTimeout(r, 0));
 
+  function readDivider() {
+    const v = Math.round(+E.divider.value || 1);
+    return Math.max(1, Math.min(4, v));
+  }
+
   function toast(msg) {
     E.toast.textContent = msg;
     E.toast.classList.add('show');
     clearTimeout(toastTimer);
     toastTimer = setTimeout(() => E.toast.classList.remove('show'), 2000);
   }
-
   function startProgress() { E.progressBar.classList.add('active'); }
   function stopProgress() { E.progressBar.classList.remove('active'); }
 
@@ -361,13 +433,32 @@ footer code{font-family:var(--mono);font-size:11px;background:var(--soft);paddin
   }
 
   // ─── Labels ─────────────────────────────────────────────────
+  const MODE_LABEL = { auto:'Auto', l:'Landscape', p:'Portrait', s:'Square' };
+  const DESIGN_LABEL = { block:'Block', shade:'Shade', gray:'Gray' };
+
   function labels() {
     E.colorsVal.textContent = E.colors.value;
     E.threshVal.textContent = E.thresh.value;
     E.brightnessVal.textContent = (+E.brightness.value/100).toFixed(2);
     E.saturationVal.textContent = (+E.saturation.value/100).toFixed(2);
     E.contrastVal.textContent = (+E.contrast.value/100).toFixed(2);
-    E.dividerVal.textContent = (+E.divider.value).toFixed(2);
+    E.dividerVal.textContent = readDivider();
+
+    E.sizePreview.textContent = `${E.cols.value}×${E.rows.value} · ${MODE_LABEL[E.mode.value] || 'Auto'}`;
+    E.designPreview.textContent = `${DESIGN_LABEL[E.design.value] || 'Block'} · ${E.colors.value} colours`;
+    E.adjPreview.textContent =
+      `B ${(+E.brightness.value/100).toFixed(2)} · ` +
+      `S ${(+E.saturation.value/100).toFixed(2)} · ` +
+      `C ${(+E.contrast.value/100).toFixed(2)}`;
+
+    const alphaVal = (E.alpha.value || 'ff').replace(/[^0-9a-f]/ig, '').slice(0,2).padEnd(2,'f') || 'ff';
+    E.bgPreview.textContent = `${E.bg.value} · α ${E.thresh.value} · ${alphaVal}`;
+
+    const exp = [];
+    if (E.square.checked) exp.push('square');
+    if (E.hash.checked) exp.push('hash');
+    if (E.dupes.checked) exp.push('dupes');
+    E.exportPreview.textContent = exp.length ? exp.join(' · ') : 'none';
   }
 
   function settings(cols = +E.cols.value || 80, rows = +E.rows.value || 45) {
@@ -391,13 +482,20 @@ footer code{font-family:var(--mono);font-size:11px;background:var(--soft);paddin
             s.bgR, s.bgG, s.bgB, s.thresh, s.alpha].join('|');
   }
 
-  // ─── Profile dims ──────────────────────────────────────────
+  // ─── Profile dims ───────────────────────────────────────────
   function effectiveMode() {
     let m = E.mode.value;
     if (m === 'auto') {
       if (!frames.length) return 'l';
-      const q = frames[0].img.width / frames[0].img.height;
-      m = q > 1.15 ? 'l' : q < 0.87 ? 'p' : 's';
+      // Use image natural size once decoded; else fall back
+      const f = frames[0];
+      const c = imgCache.get(f.id);
+      if (c && c.img && c.img.naturalWidth) {
+        const q = c.img.naturalWidth / c.img.naturalHeight;
+        return q > 1.15 ? 'l' : q < 0.87 ? 'p' : 's';
+      }
+      // Fallback: assume landscape until we know
+      return 'l';
     }
     return m;
   }
@@ -405,7 +503,7 @@ footer code{font-family:var(--mono);font-size:11px;background:var(--soft);paddin
   function profileDims() {
     const m = effectiveMode();
     const base = m === 'p' ? [45, 80] : m === 's' ? [64, 64] : [80, 45];
-    const d = +E.divider.value || 1;
+    const d = readDivider();
     return [
       Math.max(4, Math.min(200, Math.floor(base[0] / d))),
       Math.max(4, Math.min(200, Math.floor(base[1] / d)))
@@ -418,24 +516,46 @@ footer code{font-family:var(--mono);font-size:11px;background:var(--soft);paddin
     E.rows.value = h;
   }
 
-  // ─── Image loading (with EXIF orientation fallback) ────────
-  async function loadImageFromBlob(blob) {
-    const url = URL.createObjectURL(blob);
-    // Use createImageBitmap when available for EXIF orientation support
-    if (typeof createImageBitmap === 'function') {
-      try {
-        const bmp = await createImageBitmap(blob, { imageOrientation: 'from-image' });
-        return { img: bmp, url, isBitmap: true };
-      } catch (e) { /* fall through */ }
+  // ─── Decode (lazy, cached) ──────────────────────────────────
+  function getCachedImage(frame) {
+    const c = imgCache.get(frame.id);
+    if (c && c.img && c.img.complete && c.img.naturalWidth > 0) {
+      // LRU refresh
+      imgCache.delete(frame.id);
+      imgCache.set(frame.id, c);
+      return c.img;
     }
-    return new Promise((resolve, reject) => {
-      const img = new Image();
-      img.onload = () => resolve({ img, url, isBitmap: false });
-      img.onerror = () => { URL.revokeObjectURL(url); reject(new Error('image load failed')); };
-      img.src = url;
-    });
+    return null;
   }
 
+  function decodeImage(frame) {
+    const cached = getCachedImage(frame);
+    if (cached) return Promise.resolve(cached);
+    if (decoding.has(frame.id)) return decoding.get(frame.id);
+    const p = new Promise((resolve, reject) => {
+      const img = new Image();
+      img.decoding = 'async';
+      img.onload = () => {
+        decoding.delete(frame.id);
+        imgCache.set(frame.id, { img });
+        // Evict oldest
+        while (imgCache.size > IMG_CACHE_MAX) {
+          const k = imgCache.keys().next().value;
+          imgCache.delete(k);
+        }
+        resolve(img);
+      };
+      img.onerror = () => {
+        decoding.delete(frame.id);
+        reject(new Error('decode failed'));
+      };
+      img.src = frame.url;
+    });
+    decoding.set(frame.id, p);
+    return p;
+  }
+
+  // ─── Loading ────────────────────────────────────────────────
   async function loadZip(file) {
     const zip = await JSZip.loadAsync(file);
     const keys = Object.keys(zip.files)
@@ -444,11 +564,17 @@ footer code{font-family:var(--mono);font-size:11px;background:var(--soft);paddin
     const out = [];
     for (let i = 0; i < keys.length; i++) {
       const blob = await zip.files[keys[i]].async('blob');
-      try {
-        const { img, url, isBitmap } = await loadImageFromBlob(blob);
-        out.push({ name: keys[i].split('/').pop(), img, url, isBitmap });
-      } catch (e) { /* skip bad image */ }
-      if (i % 5 === 0) {
+      // Only create blob URL — do NOT decode here.
+      const url = URL.createObjectURL(blob);
+      out.push({
+        id: nextId++,
+        name: keys[i].split('/').pop(),
+        blob,
+        url,
+        edited: null,
+        _cache: null
+      });
+      if (i % 25 === 0) {
         E.source.textContent = `Extracting ZIP… ${i + 1} / ${keys.length}`;
         await yieldUI();
       }
@@ -463,7 +589,7 @@ footer code{font-family:var(--mono);font-size:11px;background:var(--soft);paddin
     const total = list.length;
     let processed = 0;
 
-    for (const f of [...list]) {
+    for (const f of list) {
       processed++;
       E.source.textContent = `Loading ${processed} / ${total}…`;
       await yieldUI();
@@ -472,29 +598,43 @@ footer code{font-family:var(--mono);font-size:11px;background:var(--soft);paddin
         const inner = await loadZip(f);
         add.push(...inner);
       } else if (f.type && f.type.startsWith('image/')) {
-        try {
-          const { img, url, isBitmap } = await loadImageFromBlob(f);
-          add.push({ name: f.name, img, url, isBitmap });
-        } catch (e) {}
+        const url = URL.createObjectURL(f);
+        add.push({
+          id: nextId++,
+          name: f.name,
+          blob: f,
+          url,
+          edited: null,
+          _cache: null
+        });
       }
     }
 
     add.sort((a, b) => natural(a.name, b.name));
+    const wasEmpty = frames.length === 0;
     frames.push(...add);
     if (at < 0) at = 0;
 
     E.source.textContent = `${frames.length} frame${frames.length === 1 ? '' : 's'} loaded.`;
-    thumbsWindowStart = Math.max(0, at - Math.floor(MAX_THUMBS_RENDERED / 2));
-    renderThumbs();
 
-    if (E.mode.value === 'auto') syncDimsFromProfile();
+    // If mode is auto, and we just loaded the first ever frame, kick off its decode
+    // so we can detect orientation, then sync dims.
+    if (wasEmpty && frames.length) {
+      try { await decodeImage(frames[0]); } catch (e) {}
+      if (E.mode.value === 'auto') syncDimsFromProfile();
+    }
+
+    // Reset thumbnail window
+    lastThumbsKey = '';
+    invalidateThumbs();
+    scrollToActive();
 
     show();
     stopProgress();
     toast(`Loaded ${add.length} frame${add.length === 1 ? '' : 's'}`);
   }
 
-  // ─── Palette + render ──────────────────────────────────────
+  // ─── Palette & render ───────────────────────────────────────
   function nearestColor(r, g, b, palette) {
     let best = palette[0], bd = Infinity;
     for (let i = 0; i < palette.length; i++) {
@@ -541,16 +681,14 @@ footer code{font-family:var(--mono);font-size:11px;background:var(--soft);paddin
     return cs;
   }
 
-  let _workCanvas = null;
-  let _workCtx = null;
+  let _workCanvas = null, _workCtx = null;
   function getWorkContext(w, h) {
     if (!_workCanvas) {
       _workCanvas = document.createElement('canvas');
       _workCtx = _workCanvas.getContext('2d', { willReadFrequently: true });
     }
     if (_workCanvas.width !== w || _workCanvas.height !== h) {
-      _workCanvas.width = w;
-      _workCanvas.height = h;
+      _workCanvas.width = w; _workCanvas.height = h;
     } else {
       _workCtx.clearRect(0, 0, w, h);
     }
@@ -561,10 +699,9 @@ footer code{font-family:var(--mono);font-size:11px;background:var(--soft);paddin
     const ctx = getWorkContext(s.cols, s.rows);
     ctx.imageSmoothingEnabled = true;
     ctx.imageSmoothingQuality = 'high';
-    // Fill with white so transparent source pixels become white
     ctx.fillStyle = '#ffffff';
     ctx.fillRect(0, 0, s.cols, s.rows);
-    ctx.drawImage(img, 0, 0, s.cols, s.rows);
+    try { ctx.drawImage(img, 0, 0, s.cols, s.rows); } catch (e) {}
 
     let imgData;
     try {
@@ -575,15 +712,12 @@ footer code{font-family:var(--mono);font-size:11px;background:var(--soft);paddin
     const d = imgData.data;
     const n = s.cols * s.rows;
 
-    // Force alpha to 255 (we don't want source alpha)
     for (let i = 3; i < d.length; i += 4) d[i] = 255;
 
-    // Mean luminance for contrast
     let mean = 0;
     for (let i = 0; i < d.length; i += 4) mean += lum(d[i], d[i+1], d[i+2]);
     mean /= n;
 
-    // Brightness → Saturation → Contrast
     for (let i = 0; i < d.length; i += 4) {
       let r = d[i] * s.brightness;
       let g = d[i+1] * s.brightness;
@@ -610,7 +744,6 @@ footer code{font-family:var(--mono);font-size:11px;background:var(--soft);paddin
       gray[i] = clamp(lum(d[o], d[o+1], d[o+2]));
     }
 
-    // Build text + preview
     const shade = ['░','▒','▓','█'];
     const grayChars = ' .:-=+*#%@';
     const lines = [];
@@ -624,10 +757,7 @@ footer code{font-family:var(--mono);font-size:11px;background:var(--soft);paddin
         const o = i * 4;
         const pr = d[o], pg = d[o+1], pb = d[o+2];
 
-        // Copy to preview
-        preview[o] = pr;
-        preview[o+1] = pg;
-        preview[o+2] = pb;
+        preview[o] = pr; preview[o+1] = pg; preview[o+2] = pb;
 
         if (s.design === 'gray') {
           const v = gray[i];
@@ -654,44 +784,52 @@ footer code{font-family:var(--mono);font-size:11px;background:var(--soft);paddin
     return { text: lines.join('\n'), data: preview, palette };
   }
 
-  function renderCached(frame, s) {
-    const key = settingsKey(s);
-    if (frame._cache && frame._cache.key === key) return frame._cache.result;
-    const r = render(frame.img, s);
-    frame._cache = { key, result: r };
-    return r;
-  }
-
   function drawPreview(result, s) {
     const c = E.preview;
     if (c.width !== s.cols || c.height !== s.rows) {
-      c.width = s.cols;
-      c.height = s.rows;
+      c.width = s.cols; c.height = s.rows;
     }
     const ctx = c.getContext('2d', { willReadFrequently: false });
     const imgData = ctx.createImageData(s.cols, s.rows);
-    if (result.data.length === imgData.data.length) {
-      imgData.data.set(result.data);
-    }
+    if (result.data.length === imgData.data.length) imgData.data.set(result.data);
     ctx.putImageData(imgData, 0, 0);
   }
 
-  // ─── Thumbnails ────────────────────────────────────────────
-  function renderThumbs() {
-    E.thumbs.innerHTML = '';
-    const total = frames.length;
-    if (!total) return;
+  // ─── Thumbnail virtualization ───────────────────────────────
+  function invalidateThumbs() { lastThumbsKey = ''; scheduleThumbsRender(); }
 
-    let start = 0, end = total;
-    if (total > MAX_THUMBS_RENDERED) {
-      start = thumbsWindowStart;
-      end = Math.min(total, start + MAX_THUMBS_RENDERED);
-      if (end - start < MAX_THUMBS_RENDERED) {
-        start = Math.max(0, end - MAX_THUMBS_RENDERED);
-        thumbsWindowStart = start;
-      }
+  function scheduleThumbsRender() {
+    if (thumbsRaf) return;
+    thumbsRaf = requestAnimationFrame(() => {
+      thumbsRaf = 0;
+      renderThumbsWindow();
+    });
+  }
+
+  function renderThumbsWindow() {
+    const total = frames.length;
+    const inner = E.thumbsInner;
+    const vp = E.thumbsViewport;
+
+    if (!total) {
+      inner.innerHTML = '';
+      inner.style.width = '0px';
+      lastThumbsKey = '';
+      return;
     }
 
+    const scrollLeft = vp.scrollLeft;
+    const width = vp.clientWidth || 320;
+    const start = Math.max(0, Math.floor(scrollLeft / ITEM_W) - BUFFER);
+    const end = Math.min(total, Math.ceil((scrollLeft + width) / ITEM_W) + BUFFER);
+
+    const key = `${start}|${end}|${at}|${total}`;
+    if (key === lastThumbsKey) return;
+    lastThumbsKey = key;
+
+    inner.style.width = (total * ITEM_W) + 'px';
+
+    // Rebuild only the visible window
     const frag = document.createDocumentFragment();
     for (let i = start; i < end; i++) {
       const f = frames[i];
@@ -699,6 +837,7 @@ footer code{font-family:var(--mono);font-size:11px;background:var(--soft);paddin
       b.type = 'button';
       b.className = 'thumb' + (i === at ? ' active' : '');
       b.dataset.i = i;
+      b.style.left = (i * ITEM_W) + 'px';
       b.title = f.name;
       b.innerHTML =
         `<img src="${f.url}" loading="lazy" alt="" decoding="async">` +
@@ -706,29 +845,30 @@ footer code{font-family:var(--mono);font-size:11px;background:var(--soft);paddin
         (f.edited != null ? '<span class="edited-dot"></span>' : '');
       frag.appendChild(b);
     }
-    E.thumbs.appendChild(frag);
+    inner.innerHTML = '';
+    inner.appendChild(frag);
   }
 
-  function updateThumbActive() {
-    const thumbs = E.thumbs.querySelectorAll('.thumb');
-    let found = false;
-    thumbs.forEach(b => {
-      const isActive = +b.dataset.i === at;
-      b.classList.toggle('active', isActive);
-      if (isActive) found = true;
-    });
-    if (!found && frames.length > MAX_THUMBS_RENDERED) {
-      // Recenter window
-      thumbsWindowStart = Math.max(0, Math.min(frames.length - MAX_THUMBS_RENDERED, at - Math.floor(MAX_THUMBS_RENDERED / 2)));
-      renderThumbs();
+  function scrollToActive(behavior = 'smooth') {
+    if (at < 0) return;
+    const vp = E.thumbsViewport;
+    const itemStart = at * ITEM_W;
+    const itemEnd = itemStart + THUMB_W;
+    const viewStart = vp.scrollLeft;
+    const viewEnd = viewStart + vp.clientWidth;
+    let target = null;
+    if (itemStart < viewStart + 20) target = Math.max(0, itemStart - 20);
+    else if (itemEnd > viewEnd - 20) target = itemEnd - vp.clientWidth + 20;
+    if (target != null) {
+      try { vp.scrollTo({ left: target, behavior }); } catch (e) { vp.scrollLeft = target; }
     }
-    const active = E.thumbs.querySelector('.thumb.active');
-    if (active && active.scrollIntoView) {
-      try { active.scrollIntoView({ block: 'nearest', inline: 'center', behavior: 'smooth' }); } catch (e) { active.scrollIntoView(); }
-    }
+    scheduleThumbsRender();
   }
 
-  // ─── Show ──────────────────────────────────────────────────
+  E.thumbsViewport.addEventListener('scroll', scheduleThumbsRender, { passive: true });
+  window.addEventListener('resize', () => { lastThumbsKey = ''; scheduleThumbsRender(); });
+
+  // ─── Show ───────────────────────────────────────────────────
   let showScheduled = false;
   function scheduleShow() {
     if (showScheduled) return;
@@ -736,7 +876,15 @@ footer code{font-family:var(--mono);font-size:11px;background:var(--soft);paddin
     requestAnimationFrame(() => { showScheduled = false; show(); });
   }
 
-  function show() {
+  function setEmptyState(msg, big = '▦') {
+    E.stageEmpty.innerHTML = `<span class="big">${big}</span>${msg}`;
+    E.stageEmpty.style.display = '';
+    E.preview.style.display = 'none';
+  }
+
+  async function show() {
+    const seq = ++showSeq;
+
     if (at < 0 || !frames.length) {
       E.frameName.textContent = 'No frame loaded';
       E.counter.textContent = '0 / 0';
@@ -747,17 +895,54 @@ footer code{font-family:var(--mono);font-size:11px;background:var(--soft);paddin
       E.slider.disabled = true;
       E.slider.max = 0; E.slider.value = 0;
       E.editFab.classList.add('hidden');
-      E.stageEmpty.style.display = '';
-      E.preview.style.display = 'none';
+      setEmptyState('No frame loaded');
       return;
+    }
+
+    const curAt = at;
+    const f = frames[curAt];
+    const s = settings();
+
+    // ── Update UI chrome immediately (before async work) ────
+    E.slider.max = frames.length - 1;
+    E.slider.value = curAt;
+    E.slider.disabled = false;
+    E.counter.textContent = `${curAt + 1} / ${frames.length}`;
+    E.badge.textContent = `${curAt + 1}/${frames.length} · ${s.cols}×${s.rows}`;
+    E.frameName.textContent = f.name + (f.edited != null ? ' · edited' : '');
+    E.editFab.classList.remove('hidden');
+    E.editorSub.textContent = f.name;
+
+    // Update thumbnails window (active class)
+    scheduleThumbsRender();
+
+    // ── Try cached decode first ─────────────────────────────
+    let img = getCachedImage(f);
+    if (!img) {
+      // Show loading placeholder, kick off decode
+      setEmptyState('Decoding…', '⏳');
+      try {
+        img = await decodeImage(f);
+      } catch (e) {
+        if (seq !== showSeq) return;
+        setEmptyState('Failed to load', '⚠');
+        return;
+      }
+      if (seq !== showSeq) return;  // user navigated away
     }
 
     E.stageEmpty.style.display = 'none';
     E.preview.style.display = '';
 
-    const s = settings();
-    const f = frames[at];
-    const r = renderCached(f, s);
+    // ── Render (cached per settings key) ────────────────────
+    const key = settingsKey(s);
+    let r;
+    if (f._cache && f._cache.key === key) {
+      r = f._cache.result;
+    } else {
+      r = render(img, s);
+      f._cache = { key, result: r };
+    }
     lastRender = r;
 
     drawPreview(r, s);
@@ -766,13 +951,6 @@ footer code{font-family:var(--mono);font-size:11px;background:var(--soft);paddin
     if (!E.editor.classList.contains('open')) E.output.value = text;
     else if (!E.output.value) E.output.value = text;
 
-    E.slider.max = frames.length - 1;
-    E.slider.value = at;
-    E.slider.disabled = false;
-    E.counter.textContent = `${at + 1} / ${frames.length}`;
-    E.badge.textContent = `${at + 1}/${frames.length} · ${s.cols}×${s.rows}`;
-    E.frameName.textContent = f.name + (f.edited != null ? ' · edited' : '');
-
     const len = text.length;
     const cls = len > 60000 ? 'bad' : len > 50000 ? 'warn' : 'ok';
     const label = len > 60000 ? 'TOO BIG' : len > 50000 ? 'CLOSE' : 'SAFE';
@@ -780,7 +958,6 @@ footer code{font-family:var(--mono);font-size:11px;background:var(--soft);paddin
       `<span>${s.cols}×${s.rows} · ${s.cols * s.rows} cells</span>` +
       `<span>${len} chars · <span class="${cls}">${label}</span></span>`;
 
-    // Palette
     E.palette.innerHTML = '';
     if (r.palette.length) {
       const frag = document.createDocumentFragment();
@@ -799,11 +976,6 @@ footer code{font-family:var(--mono);font-size:11px;background:var(--soft);paddin
     } else {
       E.palette.innerHTML = '<span class="palette-empty">Grayscale — no palette</span>';
     }
-
-    E.editFab.classList.remove('hidden');
-    E.editorSub.textContent = f.name;
-
-    updateThumbActive();
   }
 
   // ─── Editor ─────────────────────────────────────────────────
@@ -811,8 +983,11 @@ footer code{font-family:var(--mono);font-size:11px;background:var(--soft);paddin
     if (at < 0) return;
     const f = frames[at];
     const s = settings();
-    const r = renderCached(f, s);
-    E.output.value = f.edited != null ? f.edited : r.text;
+    const img = getCachedImage(f);
+    const auto = img && f._cache && f._cache.key === settingsKey(s)
+      ? f._cache.result.text
+      : (img ? render(img, s).text : '');
+    E.output.value = f.edited != null ? f.edited : auto;
     E.editor.classList.add('open');
     E.editorBackdrop.classList.add('show');
     document.body.style.overflow = 'hidden';
@@ -825,10 +1000,10 @@ footer code{font-family:var(--mono);font-size:11px;background:var(--soft);paddin
     E.editor.classList.remove('open');
     E.editorBackdrop.classList.remove('show');
     document.body.style.overflow = '';
-    // Sync edited state on close
     if (at >= 0) {
       const f = frames[at];
-      const auto = renderCached(f, settings()).text;
+      const img = getCachedImage(f);
+      const auto = img ? render(img, settings()).text : '';
       f.edited = E.output.value === auto ? null : E.output.value;
       updateThumbDot();
       show();
@@ -836,7 +1011,7 @@ footer code{font-family:var(--mono);font-size:11px;background:var(--soft);paddin
   }
 
   function updateThumbDot() {
-    const thumb = E.thumbs.querySelector(`.thumb[data-i="${at}"]`);
+    const thumb = E.thumbsInner.querySelector(`.thumb[data-i="${at}"]`);
     if (!thumb) return;
     const dot = thumb.querySelector('.edited-dot');
     const hasEdit = frames[at] && frames[at].edited != null;
@@ -856,7 +1031,8 @@ footer code{font-family:var(--mono);font-size:11px;background:var(--soft);paddin
     clearTimeout(editTimer);
     editTimer = setTimeout(() => {
       const f = frames[at];
-      const auto = renderCached(f, settings()).text;
+      const img = getCachedImage(f);
+      const auto = img ? render(img, settings()).text : '';
       f.edited = E.output.value === auto ? null : E.output.value;
       E.editorReset.disabled = f.edited == null;
       E.editorHint.textContent = f.edited != null ? 'Edited' : 'Auto';
@@ -873,8 +1049,8 @@ footer code{font-family:var(--mono);font-size:11px;background:var(--soft);paddin
   E.editorReset.onclick = () => {
     if (at < 0) return;
     frames[at].edited = null;
-    const auto = renderCached(frames[at], settings()).text;
-    E.output.value = auto;
+    const img = getCachedImage(frames[at]);
+    E.output.value = img ? render(img, settings()).text : '';
     E.editorReset.disabled = true;
     E.editorHint.textContent = 'Auto';
     updateThumbDot();
@@ -882,7 +1058,7 @@ footer code{font-family:var(--mono);font-size:11px;background:var(--soft);paddin
   };
   E.editorCopy.onclick = () => copyText(E.output.value, 'Markup copied');
 
-  // ─── Copy ──────────────────────────────────────────────────
+  // ─── Copy ───────────────────────────────────────────────────
   function copyText(text, msg) {
     if (!text) return;
     if (navigator.clipboard && navigator.clipboard.writeText) {
@@ -901,11 +1077,10 @@ footer code{font-family:var(--mono);font-size:11px;background:var(--soft);paddin
     document.body.removeChild(ta);
   }
 
-  // ─── ZIP download ──────────────────────────────────────────
+  // ─── ZIP download ───────────────────────────────────────────
   async function downloadRange(startIdx, endIdx, filename) {
     if (startIdx < 0 || endIdx >= frames.length) return;
 
-    // Always include both folders (fall back to both if neither is checked)
     let folders = [];
     if (E.square.checked) folders.push('square');
     if (E.hash.checked) folders.push('hash');
@@ -923,13 +1098,21 @@ footer code{font-family:var(--mono);font-size:11px;background:var(--soft);paddin
       let prev = null;
       for (let i = startIdx; i <= endIdx; i++) {
         const f = frames[i];
-        const text = f.edited != null ? f.edited : renderCached(f, s).text;
-        if (!(E.dupes.checked && text === prev)) {
+        let text = '';
+        if (f.edited != null) {
+          text = f.edited;
+        } else {
+          try {
+            const img = await decodeImage(f);
+            text = render(img, s).text;
+          } catch (e) { text = ''; }
+        }
+        if (text && !(E.dupes.checked && text === prev)) {
           zip.file(`${folder}/frame_${String(i + 1).padStart(5, '0')}.txt`, text);
         }
         prev = text;
         done++;
-        if (done % 10 === 0) {
+        if (done % 5 === 0) {
           E.source.textContent = `Zipping ${done} / ${total}…`;
           await yieldUI();
         }
@@ -938,7 +1121,7 @@ footer code{font-family:var(--mono);font-size:11px;background:var(--soft);paddin
       zip.file(`${folder}/meta.txt`,
         `cols=${w}\nrows=${h}\nfps=${E.outFps.value}\nsource_fps=${E.srcFps.value}\n` +
         `interval=${interval}\ntotal=${endIdx - startIdx + 1}\ndesign=${s.design}\n` +
-        `mode=${E.mode.value}\ndivider=${E.divider.value}\n`
+        `mode=${E.mode.value}\ndivider=${readDivider()}\n`
       );
     }
 
@@ -968,7 +1151,7 @@ footer code{font-family:var(--mono);font-size:11px;background:var(--soft);paddin
     }, 'image/png');
   };
 
-  // ─── Events ────────────────────────────────────────────────
+  // ─── Events ─────────────────────────────────────────────────
   E.files.onchange = () => load(E.files.files);
   ['dragenter','dragover'].forEach(n => E.drop.addEventListener(n, e => {
     e.preventDefault(); E.drop.classList.add('drag');
@@ -980,21 +1163,23 @@ footer code{font-family:var(--mono);font-size:11px;background:var(--soft);paddin
 
   E.clear.onclick = () => {
     frames.forEach(f => { if (f.url) URL.revokeObjectURL(f.url); });
-    frames = []; at = -1; lastRender = null; thumbsWindowStart = 0;
+    frames = []; at = -1; lastRender = null;
+    imgCache.clear(); decoding.clear();
     E.source.textContent = 'No frames loaded.';
-    renderThumbs();
+    invalidateThumbs();
     show();
     toast('Cleared');
   };
 
-  E.prev.onclick = () => { if (frames.length) { at = (at + frames.length - 1) % frames.length; show(); } };
-  E.next.onclick = () => { if (frames.length) { at = (at + 1) % frames.length; show(); } };
+  E.prev.onclick = () => { if (frames.length) { at = (at + frames.length - 1) % frames.length; scrollToActive(); show(); } };
+  E.next.onclick = () => { if (frames.length) { at = (at + 1) % frames.length; scrollToActive(); show(); } };
   E.slider.oninput = () => { at = +E.slider.value; scheduleShow(); };
 
-  E.thumbs.addEventListener('click', e => {
+  E.thumbsInner.addEventListener('click', e => {
     const btn = e.target.closest('.thumb');
     if (!btn) return;
     at = +btn.dataset.i;
+    scheduleThumbsRender();
     show();
   });
 
@@ -1002,23 +1187,23 @@ footer code{font-family:var(--mono);font-size:11px;background:var(--soft);paddin
   E.divider.oninput = () => { labels(); syncDimsFromProfile(); scheduleShow(); };
 
   [E.design, E.cols, E.rows, E.colors, E.brightness, E.saturation, E.contrast,
-   E.bg, E.thresh, E.alpha].forEach(x => {
+   E.bg, E.thresh, E.alpha, E.square, E.hash, E.dupes, E.outFps, E.srcFps].forEach(x => {
     x.oninput = () => { labels(); scheduleShow(); };
+    x.onchange = () => { labels(); };
   });
 
   E.reset.onclick = () => {
     Object.entries(DEFAULTS).forEach(([k, v]) => { if (E[k]) E[k].value = v; });
     frames.forEach(f => { f.edited = null; f._cache = null; });
     labels();
-    renderThumbs();
+    invalidateThumbs();
     show();
     toast('Settings reset');
   };
 
-  // ─── Init ──────────────────────────────────────────────────
   labels();
   show();
 })();
 </script>
 </body>
-  </html>
+</html>
