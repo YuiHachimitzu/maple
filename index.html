@@ -69,8 +69,7 @@ input[type=range]::-moz-range-thumb{width:18px;height:18px;border-radius:50%;bac
 .group-body{padding:14px 2px 6px;animation:groupOpen .2s ease-out}
 @keyframes groupOpen{from{opacity:0;transform:translateY(-3px)}to{opacity:1;transform:none}}
 
-/* Video panel */
-.video-panel{margin-top:12px;padding:12px;background:var(--soft);border:1px solid var(--line);border-radius:8px;animation:groupOpen .2s ease-out}
+.video-panel{margin-top:0;padding:0;background:transparent;border:0;animation:groupOpen .2s ease-out}
 .video-panel[hidden]{display:none}
 .video-panel video{width:100%;max-height:180px;border-radius:6px;background:#000;display:block;object-fit:contain}
 .video-meta{margin-top:8px;color:var(--muted);font:11.5px var(--mono);word-break:break-all;line-height:1.4}
@@ -78,6 +77,7 @@ input[type=range]::-moz-range-thumb{width:18px;height:18px;border-radius:50%;bac
 .video-est.warn{color:var(--warn)}
 .video-est.bad{color:var(--bad)}
 .video-badge{background:var(--panel);border:1px solid var(--line);border-radius:4px;padding:1px 6px;font-size:10.5px;font-weight:600}
+.video-badge.fast{color:var(--ok);border-color:var(--ok)}
 
 .buttons{display:flex;flex-wrap:wrap;gap:8px}
 .btn{flex:1;min-width:120px;padding:11px 14px;border-radius:7px;background:var(--accent);color:#17120b;font-weight:700;font-size:13.5px;transition:filter .12s,transform .08s;text-align:center;white-space:nowrap}
@@ -96,7 +96,7 @@ input[type=range]::-moz-range-thumb{width:18px;height:18px;border-radius:50%;bac
 .thumbs-inner{position:relative;height:62px;min-width:100%}
 .thumb{position:absolute;top:0;width:58px;height:58px;padding:0;border:2px solid var(--line);border-radius:7px;overflow:hidden;background:var(--soft);transition:border-color .12s}
 .thumb.active{border-color:var(--accent)}
-.thumb img{width:100%;height:100%;object-fit:cover;pointer-events:none}
+.thumb img,.thumb canvas{width:100%;height:100%;object-fit:cover;pointer-events:none;display:block}
 .thumb em{position:absolute;bottom:0;left:0;right:0;background:linear-gradient(transparent,#000d);color:#fff;font:10px var(--mono);font-style:normal;text-align:center;padding:3px 0 1px}
 .thumb .edited-dot{position:absolute;top:3px;right:3px;width:8px;height:8px;border-radius:50%;background:var(--warn);box-shadow:0 0 0 1.5px #000a}
 .thumb-status{color:var(--muted);font:12px var(--mono);margin-top:8px}
@@ -216,10 +216,9 @@ footer code{font-family:var(--mono);font-size:11px;background:var(--soft);paddin
         <p class="status thumb-status" id="source">No frames loaded.</p>
       </section>
 
-      <!-- Video → Frames -->
       <section class="panel" id="videoPanel" hidden>
         <h2 class="title">Video → Frames</h2>
-        <div class="video-panel" style="margin-top:0;padding:0;background:transparent;border:0">
+        <div class="video-panel">
           <video id="videoEl" controls playsinline muted preload="metadata"></video>
           <div class="video-meta" id="videoMeta">—</div>
           <div class="row" style="margin-top:12px">
@@ -426,10 +425,8 @@ footer code{font-family:var(--mono);font-size:11px;background:var(--soft);paddin
   let showSeq = 0;
   let playing = false;
   let playTimer = null;
-
-  // Video state
-  let currentVideo = null;     // { url, name, duration, width, height }
-  let extractionToken = null;  // { cancelled }
+  let currentVideo = null;
+  let extractionToken = null;
 
   const IMG_CACHE_MAX = 10;
   const imgCache = new Map();
@@ -440,9 +437,6 @@ footer code{font-family:var(--mono);font-size:11px;background:var(--soft);paddin
   const BUFFER = 4;
   let thumbsRaf = 0;
   let lastThumbsKey = '';
-
-  const VIDEO_MAX_DIM = 640;       // stored frame max edge (keeps memory sane)
-  const VIDEO_JPEG_QUALITY = 0.85;
 
   const DEFAULTS = {
     mode:'auto', divider:'1', design:'block', dither:'none', cols:'80', rows:'45',
@@ -498,6 +492,18 @@ footer code{font-family:var(--mono);font-size:11px;background:var(--soft);paddin
     setTimeout(() => URL.revokeObjectURL(url), 3000);
   }
 
+  function closeBitmap(bmp) {
+    if (bmp && typeof bmp.close === 'function') {
+      try { bmp.close(); } catch (e) {}
+    }
+  }
+
+  function freeFrame(frame) {
+    if (frame.url) URL.revokeObjectURL(frame.url);
+    if (frame._bitmap) { closeBitmap(frame._bitmap); frame._bitmap = null; }
+    if (frame._thumbUrl) { URL.revokeObjectURL(frame._thumbUrl); frame._thumbUrl = null; }
+  }
+
   // ─── Labels ─────────────────────────────────────────────────
   const MODE_LABEL = { auto:'Auto', l:'Landscape', p:'Portrait', s:'Square' };
   const DESIGN_LABEL = { block:'Block', shade:'Shade', gray:'Gray' };
@@ -548,6 +554,11 @@ footer code{font-family:var(--mono);font-size:11px;background:var(--soft);paddin
     if (m === 'auto') {
       if (!frames.length) return 'l';
       const c = imgCache.get(frames[0].id);
+      const bmp = frames[0]._bitmap;
+      if (bmp) {
+        const q = bmp.width / bmp.height;
+        return q > 1.15 ? 'l' : q < 0.87 ? 'p' : 's';
+      }
       if (c && c.img) {
         const w = c.img.naturalWidth || c.img.width;
         const h = c.img.naturalHeight || c.img.height;
@@ -577,8 +588,9 @@ footer code{font-family:var(--mono);font-size:11px;background:var(--soft);paddin
     E.rows.value = h;
   }
 
-  // ─── Decode (createImageBitmap, async, LRU) ────────────────
+  // ─── Decode (blob → ImageBitmap, LRU) ──────────────────────
   function getCachedImage(frame) {
+    if (frame._bitmap) return frame._bitmap;
     const c = imgCache.get(frame.id);
     if (!c || !c.img) return null;
     imgCache.delete(frame.id);
@@ -590,7 +602,7 @@ footer code{font-family:var(--mono);font-size:11px;background:var(--soft);paddin
     if (typeof createImageBitmap === 'function') {
       try {
         return await createImageBitmap(blob, { imageOrientation: 'from-image' });
-      } catch (e) { /* fall through */ }
+      } catch (e) {}
     }
     return new Promise((resolve, reject) => {
       const img = new Image();
@@ -602,6 +614,7 @@ footer code{font-family:var(--mono);font-size:11px;background:var(--soft);paddin
   }
 
   function decodeImage(frame) {
+    if (frame._bitmap) return Promise.resolve(frame._bitmap);
     const cached = getCachedImage(frame);
     if (cached) return Promise.resolve(cached);
     if (decoding.has(frame.id)) return decoding.get(frame.id);
@@ -611,7 +624,7 @@ footer code{font-family:var(--mono);font-size:11px;background:var(--soft);paddin
       while (imgCache.size > IMG_CACHE_MAX) {
         const k = imgCache.keys().next().value;
         const v = imgCache.get(k);
-        if (v && v.img && typeof v.img.close === 'function') v.img.close();
+        if (v && v.img && typeof v.img.close === 'function') closeBitmap(v.img);
         imgCache.delete(k);
       }
       return img;
@@ -626,12 +639,18 @@ footer code{font-family:var(--mono);font-size:11px;background:var(--soft);paddin
   function prewarm(idx) {
     if (idx < 0 || idx >= frames.length) return;
     const f = frames[idx];
-    if (getCachedImage(f)) return;
+    if (f._bitmap || getCachedImage(f)) return;
     decodeImage(f).catch(() => {});
   }
 
-  const imgW = img => img ? (img.naturalWidth || img.width || 0) : 0;
-  const imgH = img => img ? (img.naturalHeight || img.height || 0) : 0;
+  const imgW = img => {
+    if (!img) return 0;
+    return img.naturalWidth || img.width || 0;
+  };
+  const imgH = img => {
+    if (!img) return 0;
+    return img.naturalHeight || img.height || 0;
+  };
 
   // ─── Image / ZIP loading ────────────────────────────────────
   async function loadZip(file) {
@@ -702,7 +721,203 @@ footer code{font-family:var(--mono);font-size:11px;background:var(--soft);paddin
     toast(`Loaded ${add.length} frame${add.length === 1 ? '' : 's'}`);
   }
 
-  // ─── Video → Frames ─────────────────────────────────────────
+  // ─── Video → Frames (FAST PATH) ─────────────────────────────
+  function hasRVFC(video) {
+    return video && typeof video.requestVideoFrameCallback === 'function';
+  }
+
+  function hasOffscreenTransfer() {
+    if (typeof OffscreenCanvas === 'undefined') return false;
+    try {
+      const c = new OffscreenCanvas(2, 2);
+      return typeof c.transferToImageBitmap === 'function';
+    } catch (e) { return false; }
+  }
+
+  function pickExtractDims(srcW, srcH, expected) {
+    let maxDim;
+    if (expected <= 150) maxDim = 480;
+    else if (expected <= 400) maxDim = 320;
+    else if (expected <= 800) maxDim = 256;
+    else maxDim = 192;
+    const scale = Math.min(1, maxDim / Math.max(srcW, srcH));
+    return {
+      w: Math.max(2, Math.round(srcW * scale)),
+      h: Math.max(2, Math.round(srcH * scale))
+    };
+  }
+
+  function pickPlaybackRate(sampleFps) {
+    if (sampleFps <= 5) return 4;
+    if (sampleFps <= 8) return 3;
+    if (sampleFps <= 15) return 2;
+    return 1;
+  }
+
+  // Reusable capture surface (zero-copy via OffscreenCanvas when available)
+  let _offCanvas = null, _offCtx = null;
+  let _canvasFallback = null, _canvasCtx = null;
+
+  function getCaptureSurface(w, h) {
+    if (hasOffscreenTransfer()) {
+      if (!_offCanvas || _offCanvas.width !== w || _offCanvas.height !== h) {
+        _offCanvas = new OffscreenCanvas(w, h);
+        _offCtx = _offCanvas.getContext('2d', { alpha: false, desynchronized: true });
+      }
+      return { canvas: _offCanvas, ctx: _offCtx, offscreen: true };
+    }
+    if (!_canvasFallback) {
+      _canvasFallback = document.createElement('canvas');
+    }
+    if (_canvasFallback.width !== w || _canvasFallback.height !== h) {
+      _canvasFallback.width = w; _canvasFallback.height = h;
+      _canvasCtx = null;
+    }
+    if (!_canvasCtx) {
+      _canvasCtx = _canvasFallback.getContext('2d', { alpha: false });
+    }
+    return { canvas: _canvasFallback, ctx: _canvasCtx, offscreen: false };
+  }
+
+  // Capture current video frame as ImageBitmap (off-thread when possible)
+  function captureCurrentFrame(video, w, h, srcW, srcH) {
+    try {
+      const { canvas, ctx, offscreen } = getCaptureSurface(w, h);
+      ctx.drawImage(video, 0, 0, srcW, srcH, 0, 0, w, h);
+      if (offscreen && typeof canvas.transferToImageBitmap === 'function') {
+        return Promise.resolve(canvas.transferToImageBitmap());
+      }
+      if (typeof createImageBitmap === 'function') {
+        return createImageBitmap(canvas);
+      }
+      return new Promise((resolve, reject) => {
+        canvas.toBlob(b => {
+          if (!b) return reject(new Error('capture failed'));
+          createImageBitmap(b).then(resolve, reject);
+        }, 'image/png');
+      });
+    } catch (e) {
+      return Promise.reject(e);
+    }
+  }
+
+  // Fast extraction via playback + rVFC. 10–30× faster than seeking.
+  function extractByPlayback(video, cfg, token) {
+    const { startTime, endTime, sampleFps, srcW, srcH, w, h } = cfg;
+    const interval = 1 / sampleFps;
+
+    return new Promise((resolve, reject) => {
+      const out = [];
+      let done = false;
+      let rvfcId = null;
+      let pending = 0;
+      let nextTargetT = startTime;
+      const origRate = video.playbackRate;
+      const origMuted = video.muted;
+      const origControls = video.controls;
+
+      const cleanup = () => {
+        try { video.pause(); } catch (e) {}
+        try { video.playbackRate = origRate; } catch (e) {}
+        video.removeEventListener('error', onErr);
+        video.removeEventListener('ended', onEnded);
+        video.controls = origControls;
+        if (rvfcId && video.cancelVideoFrameCallback) {
+          try { video.cancelVideoFrameCallback(rvfcId); } catch (e) {}
+          rvfcId = null;
+        }
+      };
+
+      const finish = (err) => {
+        if (done) return;
+        done = true;
+        cleanup();
+        // Wait for in-flight captures to land before resolving
+        if (pending === 0) {
+          if (err) reject(err); else resolve(out);
+        } else {
+          const poll = () => {
+            if (pending === 0) {
+              if (err) reject(err); else resolve(out);
+            } else {
+              setTimeout(poll, 20);
+            }
+          };
+          poll();
+        }
+      };
+
+      const onErr = () => finish(new Error('video error'));
+      const onEnded = () => finish();
+
+      const capture = () => {
+        pending++;
+        captureCurrentFrame(video, w, h, srcW, srcH).then(bmp => {
+          pending--;
+          if (done) { closeBitmap(bmp); return; }
+          if (!bmp) return;
+          out.push({
+            id: nextId++,
+            name: `frame_${String(out.length + 1).padStart(5, '0')}.jpg`,
+            blob: null,
+            url: '',
+            _bitmap: bmp,
+            fromVideo: true,
+            edited: null,
+            _cache: null
+          });
+          const total = endTime - startTime;
+          if (out.length % 3 === 0) {
+            setProgress(((video.currentTime - startTime) / total) * 100);
+            E.source.textContent = `Extracting ${out.length}…`;
+          }
+        }).catch(() => { pending--; });
+      };
+
+      const onFrame = (now, meta) => {
+        if (done) return;
+        if (token.cancelled) { finish(new Error('cancelled')); return; }
+        const t = meta.mediaTime;
+        if (t < startTime - 0.001) {
+          rvfcId = video.requestVideoFrameCallback(onFrame);
+          return;
+        }
+        if (t > endTime + 0.001) { finish(); return; }
+
+        if (t >= nextTargetT) {
+          capture();
+          nextTargetT += interval;
+          // Skip forward if we fell behind
+          while (nextTargetT <= t + 0.0005) nextTargetT += interval;
+        }
+        rvfcId = video.requestVideoFrameCallback(onFrame);
+      };
+
+      video.addEventListener('error', onErr, { once: true });
+      video.addEventListener('ended', onEnded, { once: true });
+
+      const rate = pickPlaybackRate(sampleFps);
+      const startPlayback = () => {
+        video.removeEventListener('seeked', onSeeked);
+        try { video.playbackRate = rate; } catch (e) {}
+        try { video.muted = true; } catch (e) {}
+        video.controls = false;
+        const p = video.play();
+        if (p && p.catch) p.catch(e => finish(e));
+        rvfcId = video.requestVideoFrameCallback(onFrame);
+      };
+      const onSeeked = startPlayback;
+
+      if (Math.abs(video.currentTime - startTime) > 0.02) {
+        video.addEventListener('seeked', onSeeked, { once: true });
+        try { video.currentTime = startTime; } catch (e) { finish(e); }
+      } else {
+        startPlayback();
+      }
+    });
+  }
+
+  // Fallback: seek-based extraction for browsers without rVFC
   function seekVideoTo(video, time) {
     return new Promise((resolve, reject) => {
       if (video.readyState >= 2 && Math.abs(video.currentTime - time) < 0.001) {
@@ -719,7 +934,7 @@ footer code{font-family:var(--mono);font-size:11px;background:var(--soft);paddin
       const timer = setTimeout(() => {
         if (done) return;
         done = true; cleanup();
-        resolve(); // best-effort
+        resolve();
       }, 3000);
       video.addEventListener('seeked', onSeeked);
       video.addEventListener('error', onErr);
@@ -729,36 +944,79 @@ footer code{font-family:var(--mono);font-size:11px;background:var(--soft);paddin
     });
   }
 
+  async function extractBySeek(video, cfg, token) {
+    const { startTime, endTime, sampleFps, srcW, srcH, w, h } = cfg;
+    const duration = endTime - startTime;
+    const total = Math.max(1, Math.floor(duration * sampleFps));
+    const dt = duration / total;
+
+    const out = [];
+    video.pause();
+    video.controls = false;
+    for (let i = 0; i < total; i++) {
+      if (token.cancelled) throw new Error('cancelled');
+      const t = startTime + i * dt;
+      await seekVideoTo(video, Math.min(t, Math.max(0, video.duration - 0.001)));
+      if (token.cancelled) throw new Error('cancelled');
+      try {
+        const bmp = await captureCurrentFrame(video, w, h, srcW, srcH);
+        out.push({
+          id: nextId++,
+          name: `frame_${String(i + 1).padStart(5, '0')}.jpg`,
+          blob: null, url: '',
+          _bitmap: bmp,
+          fromVideo: true,
+          edited: null, _cache: null
+        });
+      } catch (e) {}
+      setProgress(((i + 1) / total) * 100);
+      E.source.textContent = `Extracting ${i + 1} / ${total}…`;
+      if (i % 3 === 0) await yieldUI();
+    }
+    video.controls = true;
+    return out;
+  }
+
+  async function extractVideoFrames(video, opts, token) {
+    const { startTime, endTime, sampleFps } = opts;
+    const srcW = video.videoWidth || 640;
+    const srcH = video.videoHeight || 360;
+    const duration = Math.max(0.001, endTime - startTime);
+    const expected = Math.max(1, Math.floor(duration * sampleFps));
+    const { w, h } = pickExtractDims(srcW, srcH, expected);
+    const cfg = { startTime, endTime, sampleFps, srcW, srcH, w, h };
+
+    if (hasRVFC(video)) {
+      return extractByPlayback(video, cfg, token);
+    }
+    return extractBySeek(video, cfg, token);
+  }
+
+  // ─── Video loading UI ───────────────────────────────────────
   async function handleVideoFile(file) {
     if (!file.type || !file.type.startsWith('video/')) return;
-
-    // Stop any in-progress extraction
     if (extractionToken) { extractionToken.cancelled = true; extractionToken = null; }
 
-    // Release previous video
     if (currentVideo && currentVideo.url) URL.revokeObjectURL(currentVideo.url);
-    if (currentVideo && currentVideo._revokeOnVideoEl) { /* noop */ }
-
     const url = URL.createObjectURL(file);
     const v = E.videoEl;
     try { v.pause(); } catch (e) {}
     v.removeAttribute('src');
     v.load();
     v.src = url;
+    v.muted = true;
 
-    // Wait for metadata
     try {
       await new Promise((resolve, reject) => {
-        const onMeta = () => { v.removeEventListener('loadedmetadata', onMeta); v.removeEventListener('error', onErr); resolve(); };
-        const onErr = () => { v.removeEventListener('loadedmetadata', onMeta); v.removeEventListener('error', onErr); reject(new Error('video load failed')); };
-        v.addEventListener('loadedmetadata', onMeta, { once: true });
-        v.addEventListener('error', onErr, { once: true });
-        // If metadata is already there, resolve immediately
-        if (v.readyState >= 1 && v.duration) {
+        const onMeta = () => { cleanup(); resolve(); };
+        const onErr = () => { cleanup(); reject(new Error('video load failed')); };
+        const cleanup = () => {
           v.removeEventListener('loadedmetadata', onMeta);
           v.removeEventListener('error', onErr);
-          resolve();
-        }
+        };
+        v.addEventListener('loadedmetadata', onMeta, { once: true });
+        v.addEventListener('error', onErr, { once: true });
+        if (v.readyState >= 1 && v.duration) { cleanup(); resolve(); }
       });
     } catch (e) {
       URL.revokeObjectURL(url);
@@ -767,18 +1025,15 @@ footer code{font-family:var(--mono);font-size:11px;background:var(--soft);paddin
     }
 
     currentVideo = {
-      url,
-      name: file.name,
+      url, name: file.name,
       duration: v.duration || 0,
       width: v.videoWidth || 0,
       height: v.videoHeight || 0
     };
 
-    // Sensible defaults
     E.vidStart.value = 0;
     E.vidEnd.value = Math.round(currentVideo.duration * 100) / 100;
-    const guess = Math.max(1, Math.min(30, Math.round(+E.srcFps.value || 10)));
-    E.vidFps.value = guess;
+    E.vidFps.value = Math.max(1, Math.min(30, Math.round(+E.srcFps.value || 10)));
 
     E.videoPanel.hidden = false;
     updateVideoMeta();
@@ -789,7 +1044,8 @@ footer code{font-family:var(--mono);font-size:11px;background:var(--soft);paddin
     if (!currentVideo) return;
     const v = currentVideo;
     const dims = v.width && v.height ? `${v.width}×${v.height}` : '—';
-    E.videoMeta.textContent = `${v.name} · ${dims} · ${fmtTime(v.duration)} (${v.duration.toFixed(2)}s)`;
+    const fast = hasRVFC(E.videoEl) ? ' · fast mode' : ' · seek mode';
+    E.videoMeta.textContent = `${v.name} · ${dims} · ${fmtTime(v.duration)} (${v.duration.toFixed(2)}s)${fast}`;
     E.vidDuration.value = v.duration.toFixed(2) + 's';
     updateVideoEstimate();
   }
@@ -808,65 +1064,20 @@ footer code{font-family:var(--mono);font-size:11px;background:var(--soft);paddin
 
     let cls = 'video-est';
     let note = '';
-    if (n > 5000) { cls += ' bad'; note = ' — very large, extraction will be slow'; }
-    else if (n > 1500) { cls += ' warn'; note = ' — large, extraction may take a while'; }
+    if (n > 5000) { cls += ' bad'; note = ' — huge, will use significant memory'; }
+    else if (n > 1500) { cls += ' warn'; note = ' — large, use lower FPS if possible'; }
 
+    const fast = hasRVFC(E.videoEl);
+    const badge = fast ? '<span class="video-badge fast">⚡ fast</span>' : '';
     E.videoEst.className = cls;
     E.videoEst.innerHTML =
-      `<span class="video-badge">≈ ${n} frame${n === 1 ? '' : 's'}</span>` +
+      `${badge}<span class="video-badge">≈ ${n} frame${n === 1 ? '' : 's'}</span>` +
       `<span>${dur.toFixed(2)}s × ${fps} fps${note}</span>`;
-  }
-
-  async function extractVideoFrames(video, opts, token) {
-    const { startTime, endTime, sampleFps } = opts;
-
-    // Downsize for storage: keep max dim at 640
-    const srcW = video.videoWidth || 640;
-    const srcH = video.videoHeight || 360;
-    const scale = Math.min(1, VIDEO_MAX_DIM / Math.max(srcW, srcH));
-    const w = Math.max(2, Math.round(srcW * scale));
-    const h = Math.max(2, Math.round(srcH * scale));
-
-    const canvas = document.createElement('canvas');
-    canvas.width = w; canvas.height = h;
-    const ctx = canvas.getContext('2d', { alpha: false });
-
-    const duration = endTime - startTime;
-    const total = Math.max(1, Math.floor(duration * sampleFps));
-    const dt = duration / total;
-
-    video.pause();
-
-    const out = [];
-    for (let i = 0; i < total; i++) {
-      if (token.cancelled) throw new Error('cancelled');
-      const t = startTime + i * dt;
-      await seekVideoTo(video, Math.min(t, Math.max(0, video.duration - 0.001)));
-      if (token.cancelled) throw new Error('cancelled');
-
-      ctx.fillStyle = '#000';
-      ctx.fillRect(0, 0, w, h);
-      try { ctx.drawImage(video, 0, 0, w, h); } catch (e) {}
-
-      const blob = await new Promise(r => canvas.toBlob(r, 'image/jpeg', VIDEO_JPEG_QUALITY));
-      const url = URL.createObjectURL(blob);
-      out.push({
-        id: nextId++,
-        name: `frame_${String(i + 1).padStart(5, '0')}.jpg`,
-        blob, url, edited: null, _cache: null,
-        fromVideo: true
-      });
-
-      setProgress(((i + 1) / total) * 100);
-      E.source.textContent = `Extracting frame ${i + 1} / ${total}…`;
-      if (i % 2 === 0) await yieldUI();
-    }
-    return out;
   }
 
   function clearVideoFrames() {
     const removed = frames.filter(f => f.fromVideo);
-    removed.forEach(f => { if (f.url) URL.revokeObjectURL(f.url); });
+    removed.forEach(freeFrame);
     frames = frames.filter(f => !f.fromVideo);
   }
 
@@ -877,7 +1088,6 @@ footer code{font-family:var(--mono);font-size:11px;background:var(--soft);paddin
     const fps = Math.max(1, Math.min(60, +E.vidFps.value || 10));
     const start = Math.max(0, +E.vidStart.value || 0);
     const end = Math.min(currentVideo.duration, +E.vidEnd.value || currentVideo.duration);
-
     if (end <= start) { toast('End must be after start'); return; }
 
     const token = { cancelled: false };
@@ -888,6 +1098,8 @@ footer code{font-family:var(--mono);font-size:11px;background:var(--soft);paddin
     E.vidExtract.textContent = 'Extracting…';
     E.vidClear.disabled = true;
     E.files.disabled = true;
+    setProgress(0);
+    const t0 = performance.now();
 
     try {
       const newFrames = await extractVideoFrames(E.videoEl, {
@@ -895,24 +1107,23 @@ footer code{font-family:var(--mono);font-size:11px;background:var(--soft);paddin
       }, token);
 
       if (token.cancelled) {
-        // Cleanup partial output
-        newFrames.forEach(f => { if (f.url) URL.revokeObjectURL(f.url); });
+        newFrames.forEach(freeFrame);
         toast('Extraction cancelled');
         return;
       }
 
-      // Replace prior video frames with new ones
       clearVideoFrames();
       const firstIdx = frames.length;
       frames.push(...newFrames);
       at = firstIdx;
 
+      const elapsed = ((performance.now() - t0) / 1000).toFixed(2);
       E.source.textContent = `${frames.length} frame${frames.length === 1 ? '' : 's'} loaded.`;
       lastThumbsKey = '';
       invalidateThumbs();
       scrollToActive('auto');
       show();
-      toast(`Extracted ${newFrames.length} frame${newFrames.length === 1 ? '' : 's'}`);
+      toast(`⚡ ${newFrames.length} frames in ${elapsed}s`);
     } catch (e) {
       if (token.cancelled) toast('Extraction cancelled');
       else { console.warn(e); toast('Extraction failed'); }
@@ -923,6 +1134,7 @@ footer code{font-family:var(--mono);font-size:11px;background:var(--soft);paddin
       E.vidExtract.textContent = 'Extract frames';
       E.vidClear.disabled = false;
       E.files.disabled = false;
+      try { E.videoEl.controls = true; } catch (e) {}
       if (frames.length) E.source.textContent = `${frames.length} frame${frames.length === 1 ? '' : 's'} loaded.`;
     }
   }
@@ -937,9 +1149,8 @@ footer code{font-family:var(--mono);font-size:11px;background:var(--soft);paddin
     E.videoEl.removeAttribute('src');
     E.videoEl.load();
     E.videoPanel.hidden = true;
-    // Also clear any already-extracted video frames
     clearVideoFrames();
-    if (frames.length) { at = Math.min(at, frames.length - 1); at = Math.max(0, at); }
+    if (frames.length) { at = Math.min(Math.max(0, at), frames.length - 1); }
     else at = -1;
     lastThumbsKey = '';
     invalidateThumbs();
@@ -1187,6 +1398,31 @@ footer code{font-family:var(--mono);font-size:11px;background:var(--soft);paddin
     });
   }
 
+  function fillThumbContent(btn, frame) {
+    if (frame._bitmap) {
+      // Draw directly to a tiny canvas — no encoding, very fast
+      const c = document.createElement('canvas');
+      c.width = THUMB_W;
+      c.height = THUMB_W;
+      const ctx = c.getContext('2d', { alpha: false });
+      const bmp = frame._bitmap;
+      const bw = bmp.width || 1, bh = bmp.height || 1;
+      const scale = Math.max(THUMB_W / bw, THUMB_W / bh);
+      const dw = bw * scale, dh = bh * scale;
+      try {
+        ctx.drawImage(bmp, (THUMB_W - dw) / 2, (THUMB_W - dh) / 2, dw, dh);
+      } catch (e) {}
+      btn.appendChild(c);
+    } else if (frame.url) {
+      const img = document.createElement('img');
+      img.src = frame.url;
+      img.loading = 'lazy';
+      img.decoding = 'async';
+      img.alt = '';
+      btn.appendChild(img);
+    }
+  }
+
   function renderThumbsWindow() {
     const total = frames.length;
     const inner = E.thumbsInner;
@@ -1219,10 +1455,15 @@ footer code{font-family:var(--mono);font-size:11px;background:var(--soft);paddin
       b.dataset.i = i;
       b.style.left = (i * ITEM_W) + 'px';
       b.title = f.name;
-      b.innerHTML =
-        `<img src="${f.url}" loading="lazy" alt="" decoding="async">` +
-        `<em>${i+1}</em>` +
-        (f.edited != null ? '<span class="edited-dot"></span>' : '');
+      fillThumbContent(b, f);
+      const em = document.createElement('em');
+      em.textContent = i + 1;
+      b.appendChild(em);
+      if (f.edited != null) {
+        const dot = document.createElement('span');
+        dot.className = 'edited-dot';
+        b.appendChild(dot);
+      }
       frag.appendChild(b);
     }
     inner.innerHTML = '';
@@ -1582,7 +1823,6 @@ footer code{font-family:var(--mono);font-size:11px;background:var(--soft);paddin
     const arr = [...files];
     const videos = arr.filter(f => f.type && f.type.startsWith('video/'));
     const others = arr.filter(f => !(f.type && f.type.startsWith('video/')));
-
     if (videos.length) {
       handleVideoFile(videos[0]);
       if (videos.length > 1) toast('One video at a time — using first');
@@ -1602,7 +1842,6 @@ footer code{font-family:var(--mono);font-size:11px;background:var(--soft);paddin
   E.clear.onclick = () => {
     pause();
     if (extractionToken) { extractionToken.cancelled = true; extractionToken = null; }
-    // Stop and release video
     if (currentVideo && currentVideo.url) URL.revokeObjectURL(currentVideo.url);
     currentVideo = null;
     try { E.videoEl.pause(); } catch (e) {}
@@ -1610,9 +1849,9 @@ footer code{font-family:var(--mono);font-size:11px;background:var(--soft);paddin
     E.videoEl.load();
     E.videoPanel.hidden = true;
 
-    frames.forEach(f => { if (f.url) URL.revokeObjectURL(f.url); });
+    frames.forEach(freeFrame);
     frames = []; at = -1; lastRender = null;
-    imgCache.forEach(v => { if (v.img && typeof v.img.close === 'function') v.img.close(); });
+    imgCache.forEach(v => { if (v.img) closeBitmap(v.img); });
     imgCache.clear(); decoding.clear();
     E.source.textContent = 'No frames loaded.';
     lastThumbsKey = '';
